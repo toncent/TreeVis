@@ -1,0 +1,28 @@
+.link {
+  fill: none;
+  stroke: #666;
+  stroke-width: 1.5px;
+}
+
+.node circle {
+  fill: #ccc;
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+text {
+  font: 10px sans-serif;
+  pointer-events: none;
+}
+
+body {
+    overflow: hidden;
+	  margin: 0;     /* This is used to reset any browser-default margins */
+    height: 100vh; /* This is needed to overcome a Chrome bug. */
+    width: 100vw;  /* As above. */
+}
+
+.main-canvas {
+	width : 100vw;
+	height : 100vh;
+}
