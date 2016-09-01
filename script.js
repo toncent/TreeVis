@@ -29,7 +29,7 @@ root.y0 = height/2;
 var tree = d3.tree()
     .separation( //defines how far nodes should be apart from each other
       function separation(a, b) {
-        return (a.parent == b.parent ? 2 : 3) / a.depth;
+        return (a.parent == b.parent ? .4 : 2) / a.depth;
       });
 
 //collapse the tree to only show the root and it's children
@@ -46,7 +46,7 @@ function generateRandomTree(){
   var nodes = [{"name" : "0", "parent": ""}];
   var currentNode = 0, currentNeighbor = 1, neighborCount;
   while(nodes.length < 200){
-    neighborCount = 1 + Math.round(Math.random()*5);
+    neighborCount = 1 + Math.round(Math.random()*9);
     for (var i = 0; i < neighborCount; i++) {
       nodes.push({"name" : ""+currentNeighbor++, "parent" : currentNode});
     }
