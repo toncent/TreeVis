@@ -142,6 +142,7 @@ function updateTree(){
         }
         else return "translate(" + d.x + "," + d.y + ")";
       })
+      .attr("fill", function(d) {if (d.children || d.childrenBackup) return "#000"; return "#fff"})
       //animate the circle to go to it's correct position (starting from the parents previous position)
       .transition()
         .duration(500)
