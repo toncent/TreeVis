@@ -43,12 +43,13 @@ updateTree();
 //---------------------------------------//
 
 function generateRandomTree(){
-  var nodes = [{"name" : "0", "parent": ""}];
-  var currentNode = 0, currentNeighbor = 1, neighborCount;
+  var nodes = [{"name" : "0", "parent": "", "type" : 0}];
+  var currentNode = 0, currentNeighbor = 1, neighborCount, currentType;
   while(nodes.length < 200){
     neighborCount = 1 + Math.round(Math.random()*9);
     for (var i = 0; i < neighborCount; i++) {
-      nodes.push({"name" : ""+currentNeighbor++, "parent" : currentNode});
+      currentType = Math.round(Math.random()*2)
+      nodes.push({"name" : ""+currentNeighbor++, "parent" : currentNode, "type" : currentType});
     }
     currentNode++;
   }
@@ -118,7 +119,7 @@ function updateTree(){
   calculateCoordinates();
 
   // add all the nodes from the tree as circles to the svg node Group
-  var nodes = svgNodeGroup.selectAll("circle").data(root.descendants(), function(d){return d.data.name});
+  var nodes = svgNodeGroup.selectAll("g").data(root.descendants(), function(d){return d.data.name});
   
   //transition existing nodes to their new positions
   nodes.transition()
@@ -127,32 +128,57 @@ function updateTree(){
         return "translate(" + d.x + "," + d.y + ")"}
       );
 
-  //nodes that weren't in the tree before get a circle in the svg
-  var newNodes = nodes.enter();
-      newNodes.append("circle")
-      .attr("r", function(d){ 
-        return 10 - d.depth 
-      })
-      //set the circles position to the parents starting position
-      .attr("transform", function(d){
-        if(d.parent){
-          d.x0 = d.parent.x0;
-          d.y0 = d.parent.y0;
-          return "translate(" + d.x0 + "," + d.y0 + ")";
-        }
-        else return "translate(" + d.x + "," + d.y + ")";
-      })
-      .attr("fill", function(d) {if (d.children || d.childrenBackup) return "#000"; return "#fff"})
-      //animate the circle to go to it's correct position (starting from the parents previous position)
-      .transition()
-        .duration(500)
-        .attr("transform", function(d){
-          return "translate(" + d.x + "," + d.y + ")"}
-        );
+  //nodes that weren't in the tree before get a shape in the svg according to their type
+  var newNodes = nodes.enter().append("g");
+  var circleNodes = newNodes.filter(function(d, i, nodes){
+    return d.data.type == 0;
+  });
+  var rectangleNodes = newNodes.filter(function(d, i, nodes){
+    return d.data.type == 1;
+  });
+  var ellipseNodes = newNodes.filter(function(d, i, nodes){
+    return d.data.type == 2;
+  });
+  
+  rectangleNodes.insert("rect")
+            .attr("width", function(d){ 
+              return 10 - d.depth
+            })
+            .attr("height", function(d){ 
+              return 10 - d.depth
+            });
+  ellipseNodes.insert("ellipse")
+              .attr("rx", function(d){ 
+                return 12 - d.depth
+              })
+              .attr("ry", function(d){ 
+                return 8 - d.depth
+              });
+  circleNodes.insert("circle") 
+            .attr("r", function(d){ 
+              return 10 - d.depth 
+            });
+
+  //set the new nodes positions to their parents starting position
+  newNodes.attr("transform", function(d){
+    if(d.parent){
+      d.x0 = d.parent.x0;
+      d.y0 = d.parent.y0;
+      return "translate(" + d.x0 + "," + d.y0 + ")";
+    }
+    else return "translate(" + d.x + "," + d.y + ")";
+  })
+  .attr("fill", function(d) {if (d.children || d.childrenBackup) return "#000"; return "#fff"})
+  //animate the circle to go to it's correct position (starting from the parents previous position)
+  .transition()
+    .duration(500)
+    .attr("transform", function(d){
+      return "translate(" + d.x + "," + d.y + ")"}
+    );
   //remove nodes that aren't supposed to be shown anymore
   nodes.exit().remove();
   
-  svgNodeGroup.selectAll("circle").on("click", nodeClicked);
+  svgNodeGroup.selectAll("g").on("click", nodeClicked);
 
   // add all the links from the tree to the svg link group
   var links = svgLinkGroup.selectAll("line").data(root.links(), function(d){return d.target.id});

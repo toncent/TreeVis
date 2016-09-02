@@ -19,6 +19,6 @@ line {
   stroke : #000;
 }
 
-circle {
+circle, rect, ellipse {
   stroke : #000;
 }
