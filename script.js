@@ -1,8 +1,9 @@
 var body = document.getElementsByTagName("body")[0];
 var width = body.scrollWidth, height = body.scrollHeight;
-var treeSize = height > width ? width/2 - 10 : height/2 - 10;
+var treeSize = height > width ? width/2 - 25 : height/2 - 25;
 var centerX = width/2, centerY = height / 2;
 var previousK = 0;
+var animationDuration = 600, zoomDuration = 150;
 
  // create an svg element and add it to the body
 var svg = d3.select("body").append("svg")
@@ -23,8 +24,9 @@ var root = d3.stratify()
     .id(function(d) { return d.name; }) //tells d3 where to find the id for each node
     .parentId(function(d) { return d.parent; }) //tells d3 where to find the id for each nodes parent node
     (generateRandomTree()); //passes the data to create the tree from
-root.x0 = width/2;
-root.y0 = height/2;
+var currentRoot = root;
+currentRoot.x0 = width/2;
+currentRoot.y0 = height/2;
 // create a new d3 tree
 var tree = d3.tree()
     .separation( //defines how far nodes should be apart from each other
@@ -32,8 +34,8 @@ var tree = d3.tree()
         return (a.parent == b.parent ? .4 : 2) / a.depth;
       });
 
-//collapse the tree to only show the root and it's children
-root.children.forEach(collapseAllChildren);
+//collapse the tree to only show the currentRoot and it's children
+currentRoot.children.forEach(collapseAllChildren);
 
 // tell the tree what data to use for it's nodes
 updateTree();
@@ -45,8 +47,8 @@ updateTree();
 function generateRandomTree(){
   var nodes = [{"name" : "0", "parent": "", "type" : 0}];
   var currentNode = 0, currentNeighbor = 1, neighborCount, currentType;
-  while(nodes.length < 200){
-    neighborCount = 1 + Math.round(Math.random()*9);
+  while(nodes.length < 400){
+    neighborCount = 1 + Math.round(Math.random()*4);
     for (var i = 0; i < neighborCount; i++) {
       currentType = Math.round(Math.random())
       nodes.push({"name" : ""+currentNeighbor++, "parent" : currentNode, "type" : currentType});
@@ -58,7 +60,7 @@ function generateRandomTree(){
 
 //calculates where to put each node using the layout d3 came up with as polar coordinates
 function calculateCoordinates(){
-  root.descendants().forEach(function(current){
+  currentRoot.descendants().forEach(function(current){
     var x = current.x;
     var y = current.y;
     current.x = Math.cos(x*2*Math.PI) * y * treeSize + centerX,
@@ -71,10 +73,10 @@ function zoomed() {
   if (d3.event.transform.k != previousK) {
     //zoom behaviour
     svgNodeGroup.transition()
-      .duration(150)
+      .duration(zoomDuration)
       .attr("transform", d3.event.transform);
     svgLinkGroup.transition()
-      .duration(150)
+      .duration(zoomDuration)
       .attr("transform", d3.event.transform);
   } else {
     //drag behaviour
@@ -87,8 +89,10 @@ function zoomed() {
 function nodeClicked(node){
   if (node.children) {
     collapseSingleNode(node);
+    if(node.parent) currentRoot = node.parent;
   } else {
     if (node.childrenBackup) {
+      currentRoot = node;
       node.children = node.childrenBackup;
     } else {
       return;
@@ -114,19 +118,22 @@ function collapseAllChildren(node){
 function updateTree(){
 
   //calculate a new layout for the tree
-  tree(root);
+  tree(currentRoot);
   //convert coordinates of all nodes for radial layout
   calculateCoordinates();
 
   // add all the nodes from the tree as circles to the svg node Group
-  var nodes = svgNodeGroup.selectAll("g").data(root.descendants(), function(d){return d.data.name});
+  var nodes = svgNodeGroup.selectAll("g").data(currentRoot.descendants(), function(d){return d.data.name});
   
   //transition existing nodes to their new positions
   nodes.transition()
-      .duration(500)
+      .duration(animationDuration)
       .attr("transform", function(d){
         return "translate(" + d.x + "," + d.y + ")"}
-      );
+      )
+      .attr("fill", function(d){
+        return d.id == currentRoot.id ? "#f00" : "#000";
+      });
 
   //nodes that weren't in the tree before get a shape in the svg according to their type
   var newNodes = nodes.enter().append("g");
@@ -138,14 +145,14 @@ function updateTree(){
   });
   ellipseNodes.insert("ellipse")
               .attr("rx", function(d){ 
-                return 13 - d.depth
+                return 13
               })
               .attr("ry", function(d){ 
-                return 7 - d.depth
+                return 7
               });
   circleNodes.insert("circle") 
             .attr("r", function(d){ 
-              return 10 - d.depth 
+              return 10
             });
 
   //set the new nodes positions to their parents starting position
@@ -157,10 +164,13 @@ function updateTree(){
     }
     else return "translate(" + d.x + "," + d.y + ")";
   })
-  .attr("fill", function(d) {if (d.children || d.childrenBackup) return "#000"; return "#fff"})
+  .attr("fill", function(d) {
+    if (!d.children && !d.childrenBackup) return "#fff";
+    if (d.id == currentRoot.id) return "#f00";
+    return "#000"})
   //animate the circle to go to it's correct position (starting from the parents previous position)
   .transition()
-    .duration(500)
+    .duration(animationDuration)
     .attr("transform", function(d){
       return "translate(" + d.x + "," + d.y + ")"}
     );
@@ -170,13 +180,13 @@ function updateTree(){
   svgNodeGroup.selectAll("g").on("click", nodeClicked);
 
   // add all the links from the tree to the svg link group
-  var links = svgLinkGroup.selectAll("line").data(root.links(), function(d){return d.target.id});
+  var links = svgLinkGroup.selectAll("line").data(currentRoot.links(), function(d){return d.target.id});
   
   //remove links that don't have a target anymore
   links.exit().remove();
 
   //update existing links to their new coordinates
-  links.transition().duration(500)
+  links.transition().duration(animationDuration)
       .attr("x1", function(d){ return d.source.x})
       .attr("y1", function(d){ return d.source.y})
       .attr("x2", function(d){ return d.target.x})
@@ -189,7 +199,7 @@ function updateTree(){
       .attr("y1", function(d){ return d.source.y0})
       .attr("x2", function(d){ return d.source.x0})
       .attr("y2", function(d){ return d.source.y0})
-      .transition().duration(500)
+      .transition().duration(animationDuration)
       .attr("x1", function(d){ return d.source.x})
       .attr("y1", function(d){ return d.source.y})
       .attr("x2", function(d){ return d.target.x})
