@@ -48,7 +48,7 @@ function generateRandomTree(){
   while(nodes.length < 200){
     neighborCount = 1 + Math.round(Math.random()*9);
     for (var i = 0; i < neighborCount; i++) {
-      currentType = Math.round(Math.random()*2)
+      currentType = Math.round(Math.random())
       nodes.push({"name" : ""+currentNeighbor++, "parent" : currentNode, "type" : currentType});
     }
     currentNode++;
@@ -133,26 +133,15 @@ function updateTree(){
   var circleNodes = newNodes.filter(function(d, i, nodes){
     return d.data.type == 0;
   });
-  var rectangleNodes = newNodes.filter(function(d, i, nodes){
+  var ellipseNodes = newNodes.filter(function(d, i, nodes){
     return d.data.type == 1;
   });
-  var ellipseNodes = newNodes.filter(function(d, i, nodes){
-    return d.data.type == 2;
-  });
-  
-  rectangleNodes.insert("rect")
-            .attr("width", function(d){ 
-              return 10 - d.depth
-            })
-            .attr("height", function(d){ 
-              return 10 - d.depth
-            });
   ellipseNodes.insert("ellipse")
               .attr("rx", function(d){ 
-                return 12 - d.depth
+                return 13 - d.depth
               })
               .attr("ry", function(d){ 
-                return 8 - d.depth
+                return 7 - d.depth
               });
   circleNodes.insert("circle") 
             .attr("r", function(d){ 
