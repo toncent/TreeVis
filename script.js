@@ -4,16 +4,17 @@ var treeSize = height > width ? width/2 - 100 : height/2 - 100;
 var centerX = width/2, centerY = height / 2;
 var previousK = 0;
 var animationDuration = 600, zoomDuration = 150;
+var nodeSize = Math.min(width/10, height/10);
 
  // create an svg element and add it to the body
 var svg = d3.select("body").append("svg")
     .attr("width", width)
     .attr("height", height)
-    .call(
+    .call( //adds a listener for zoom events (e.g. scrolling the mouse wheel). also handles dragging
       d3.zoom()
         .on("zoom", zoomed)
         .scaleExtent([0.2,2])
-    ); //adds a listener for zoom events (e.g. scrolling the mouse wheel). also handles dragging
+    );
 
 // create group elements in the svg for links and nodes
 var svgLinkGroup = svg.append("g");
@@ -155,21 +156,21 @@ function updateTree(){
   });
   ellipseNodes.insert("ellipse")
               .attr("rx", function(d){ 
-                return 60
+                return nodeSize
               })
               .attr("ry", function(d){ 
-                return 45
+                return nodeSize*0.6
               });
   circleNodes.insert("circle") 
             .attr("r", function(d){ 
-              return 60
+              return nodeSize;
             });
 
   //nodes get text applied to them
   newNodes.insert("text")
           .text(function(d) {return d.data.text})
           .attr("text-anchor","middle")
-          .attr("alignment-baseline", "central")
+          .attr("dominant-baseline", "central")
           .attr("font-size","1px")
           .each(calculateTextSize)
           .attr("font-size", function(d){return d.fontSize});
