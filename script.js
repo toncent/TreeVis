@@ -200,30 +200,24 @@ function updateTree(){
   svgNodeGroup.selectAll("g").on("click", nodeClicked);
 
   // add all the links from the tree to the svg link group
-  var links = svgLinkGroup.selectAll("line").data(currentRoot.links(), function(d){return d.target.id});
+  var links = svgLinkGroup.selectAll("path").data(currentRoot.links(), function(d){return d.target.id});
   
   //remove links that don't have a target anymore
   links.exit().remove();
 
+  //create a new line generator
+  var lineGenerator = d3.line();
+
   //update existing links to their new coordinates
   links.transition().duration(animationDuration)
-      .attr("x1", function(d){ return d.source.x})
-      .attr("y1", function(d){ return d.source.y})
-      .attr("x2", function(d){ return d.target.x})
-      .attr("y2", function(d){ return d.target.y});
+      .attr("d", function(d){return lineGenerator([[d.source.x, d.source.y],[d.target.x, d.target.y]])});
 
   //give the new links a corresponding line in the svg
   links.enter()
-      .append("line")
-      .attr("x1", function(d){ return d.source.x0})
-      .attr("y1", function(d){ return d.source.y0})
-      .attr("x2", function(d){ return d.source.x0})
-      .attr("y2", function(d){ return d.source.y0})
+      .append("path")
+      .attr("d", function(d){return lineGenerator([[d.source.x0, d.source.y0],[d.source.x0, d.source.y0]])})
       .transition().duration(animationDuration)
-      .attr("x1", function(d){ return d.source.x})
-      .attr("y1", function(d){ return d.source.y})
-      .attr("x2", function(d){ return d.target.x})
-      .attr("y2", function(d){ return d.target.y})
+      .attr("d", function(d){return lineGenerator([[d.source.x, d.source.y],[d.target.x, d.target.y]])});
 
   //backup the current positions for animations
   nodes.each(function(d){

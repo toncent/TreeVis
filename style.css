@@ -18,8 +18,12 @@ line {
   stroke : #000;
 }
 
-circle, rect, ellipse {
+circle, rect, ellipse, path {
   stroke : #000;
+}
+
+path {
+  fill : none;
 }
 
 text {
