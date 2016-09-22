@@ -1,5 +1,4 @@
 text {
-  font: 10px sans-serif;
   pointer-events: none;
 }
 
@@ -21,4 +20,9 @@ line {
 
 circle, rect, ellipse {
   stroke : #000;
+}
+
+text {
+  stroke : #00f;
+  fill : #00f;
 }

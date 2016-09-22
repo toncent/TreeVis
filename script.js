@@ -1,6 +1,6 @@
 var body = document.getElementsByTagName("body")[0];
 var width = body.scrollWidth, height = body.scrollHeight;
-var treeSize = height > width ? width/2 - 25 : height/2 - 25;
+var treeSize = height > width ? width/2 - 100 : height/2 - 100;
 var centerX = width/2, centerY = height / 2;
 var previousK = 0;
 var animationDuration = 600, zoomDuration = 150;
@@ -45,13 +45,13 @@ updateTree();
 //---------------------------------------//
 
 function generateRandomTree(){
-  var nodes = [{"name" : "0", "parent": "", "type" : 0}];
+  var nodes = [{"name" : "0", "parent": "", "type" : 0, "text" : "Node 1"}];
   var currentNode = 0, currentNeighbor = 1, neighborCount, currentType;
   while(nodes.length < 400){
     neighborCount = 1 + Math.round(Math.random()*4);
     for (var i = 0; i < neighborCount; i++) {
       currentType = Math.round(Math.random())
-      nodes.push({"name" : ""+currentNeighbor++, "parent" : currentNode, "type" : currentType});
+      nodes.push({"name" : ""+currentNeighbor++, "parent" : currentNode, "type" : currentType, "text" : "Node " + (currentNeighbor)});
     }
     currentNode++;
   }
@@ -66,6 +66,8 @@ function calculateCoordinates(){
     current.x = Math.cos(x*2*Math.PI) * y * treeSize + centerX,
     current.y = Math.sin(x*2*Math.PI) * y * treeSize + centerY;
   })
+  currentRoot.x = centerX;
+  currentRoot.y = centerY;
 }
 
 //updates all the nodes and links when a zoom event has occured (zoom events also happen when dragging the tree around)
@@ -115,6 +117,12 @@ function collapseAllChildren(node){
   }
 }
 
+function calculateTextSize(d){
+  var boundingBox = this.getBBox();
+  var parentBox = this.parentNode.getBBox();
+  d.fontSize = Math.min(parentBox.width / boundingBox.width, parentBox.height / boundingBox.height)*0.8 + "px";
+}
+
 function updateTree(){
 
   //calculate a new layout for the tree
@@ -135,8 +143,10 @@ function updateTree(){
         return d.id == currentRoot.id ? "#f00" : "#000";
       });
 
-  //nodes that weren't in the tree before get a shape in the svg according to their type
+  //get all the nodes that have been added to the tree
   var newNodes = nodes.enter().append("g");
+  
+  //nodes that weren't in the tree before get a shape in the svg according to their type
   var circleNodes = newNodes.filter(function(d, i, nodes){
     return d.data.type == 0;
   });
@@ -145,15 +155,24 @@ function updateTree(){
   });
   ellipseNodes.insert("ellipse")
               .attr("rx", function(d){ 
-                return 13
+                return 60
               })
               .attr("ry", function(d){ 
-                return 7
+                return 45
               });
   circleNodes.insert("circle") 
             .attr("r", function(d){ 
-              return 10
+              return 60
             });
+
+  //nodes get text applied to them
+  newNodes.insert("text")
+          .text(function(d) {return d.data.text})
+          .attr("text-anchor","middle")
+          .attr("alignment-baseline", "central")
+          .attr("font-size","1px")
+          .each(calculateTextSize)
+          .attr("font-size", function(d){return d.fontSize});
 
   //set the new nodes positions to their parents starting position
   newNodes.attr("transform", function(d){
@@ -168,7 +187,7 @@ function updateTree(){
     if (!d.children && !d.childrenBackup) return "#fff";
     if (d.id == currentRoot.id) return "#f00";
     return "#000"})
-  //animate the circle to go to it's correct position (starting from the parents previous position)
+  //animate the node to go to it's correct position (starting from the parents previous position)
   .transition()
     .duration(animationDuration)
     .attr("transform", function(d){
