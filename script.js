@@ -3,9 +3,9 @@ var width = body.scrollWidth, height = body.scrollHeight;
 var treeSize = height > width ? width/2 - 100 : height/2 - 100;
 var centerX = width/2, centerY = height / 2;
 var previousK = 0;
-var animationDuration = 600, zoomDuration = 150;
+var animationDuration = 400, zoomDuration = 150;
 var nodeSize = Math.min(width/10, height/10);
-
+var lineGenerator;
  // create an svg element and add it to the body
 var svg = d3.select("body").append("svg")
     .attr("width", width)
@@ -124,6 +124,28 @@ function calculateTextSize(d){
   d.fontSize = Math.min(parentBox.width / boundingBox.width, parentBox.height / boundingBox.height)*0.8 + "px";
 }
 
+//creates a line using d3.line() according to the links source and target
+//always creates lines so they are drawn from left to right which makes sure
+//that any text along the line will not be upside down
+function getLine(link){
+  if(link.source.x <= link.target.x){
+    return lineGenerator([[link.source.x, link.source.y],[link.target.x, link.target.y]]);
+  } else {
+    return lineGenerator([[link.target.x, link.target.y],[link.source.x, link.source.y]]);
+  }
+  
+}
+
+//decides the color of a node depending on its position in the tree
+function getNodeColor(node){
+  //leafs get white color
+  if (!node.children && !node.childrenBackup) return "#fff";
+  //the root gets red color
+  if (node.id == currentRoot.id) return "#f00";
+  //all other nodes get black color
+  return "#000";
+}
+
 function updateTree(){
 
   //calculate a new layout for the tree
@@ -140,9 +162,7 @@ function updateTree(){
       .attr("transform", function(d){
         return "translate(" + d.x + "," + d.y + ")"}
       )
-      .attr("fill", function(d){
-        return d.id == currentRoot.id ? "#f00" : "#000";
-      });
+      .attr("fill", getNodeColor);
 
   //get all the nodes that have been added to the tree
   var newNodes = nodes.enter().append("g");
@@ -178,46 +198,63 @@ function updateTree(){
   //set the new nodes positions to their parents starting position
   newNodes.attr("transform", function(d){
     if(d.parent){
-      d.x0 = d.parent.x0;
-      d.y0 = d.parent.y0;
+      d.x0 = d.parent.x;
+      d.y0 = d.parent.y;
       return "translate(" + d.x0 + "," + d.y0 + ")";
     }
     else return "translate(" + d.x + "," + d.y + ")";
   })
-  .attr("fill", function(d) {
-    if (!d.children && !d.childrenBackup) return "#fff";
-    if (d.id == currentRoot.id) return "#f00";
-    return "#000"})
+  .attr("fill", getNodeColor)
+  .attr("opacity", 0)
   //animate the node to go to it's correct position (starting from the parents previous position)
   .transition()
     .duration(animationDuration)
+    .delay(animationDuration)
     .attr("transform", function(d){
       return "translate(" + d.x + "," + d.y + ")"}
-    );
+    )
+    .attr("opacity", 1);
   //remove nodes that aren't supposed to be shown anymore
   nodes.exit().remove();
   
   svgNodeGroup.selectAll("g").on("click", nodeClicked);
 
   // add all the links from the tree to the svg link group
-  var links = svgLinkGroup.selectAll("path").data(currentRoot.links(), function(d){return d.target.id});
+  var links = svgLinkGroup.selectAll("g").data(currentRoot.links(), function(d){return d.target.id});
   
   //remove links that don't have a target anymore
   links.exit().remove();
 
   //create a new line generator
-  var lineGenerator = d3.line();
+  if(!lineGenerator) lineGenerator = d3.line();
 
   //update existing links to their new coordinates
   links.transition().duration(animationDuration)
-      .attr("d", function(d){return lineGenerator([[d.source.x, d.source.y],[d.target.x, d.target.y]])});
+      .attr("d", getLine, lineGenerator, "asdf");//function(d){return lineGenerator([[d.source.x, d.source.y],[d.target.x, d.target.y]])});
 
-  //give the new links a corresponding line in the svg
-  links.enter()
-      .append("path")
-      .attr("d", function(d){return lineGenerator([[d.source.x0, d.source.y0],[d.source.x0, d.source.y0]])})
-      .transition().duration(animationDuration)
-      .attr("d", function(d){return lineGenerator([[d.source.x, d.source.y],[d.target.x, d.target.y]])});
+  //give the new links a corresponding path in the svg and animate them
+  var newPaths = links.enter().append("g");
+  newPaths.insert("path")
+      .attr("d", function(d){return lineGenerator([[d.source.x, d.source.y],[d.source.x, d.source.y]])})
+      .attr("id", function(d){return d.source.id + "-" + d.target.id})
+      .transition()
+        .duration(animationDuration)
+        .delay(animationDuration)
+        .attr("d", getLine);
+  
+  var texts = newPaths.insert("text")
+        .attr("text-anchor", "middle")
+        .attr("font-size", 25)
+        .attr("opacity", 0);
+      texts.insert("textPath")
+        .attr("xlink:href", function(d){return "#" + d.source.id + "-" + d.target.id})
+        .attr("startOffset", "50%")
+        .attr("alpha", 0)
+        .text("supertext");
+      texts.transition()
+        .attr("opacity", 1)
+        .delay(2*animationDuration)
+        .duration(animationDuration);
 
   //backup the current positions for animations
   nodes.each(function(d){
