@@ -190,7 +190,6 @@ function updateTree(){
   newNodes.insert("text")
           .text(function(d) {return d.data.text})
           .attr("text-anchor","middle")
-          .attr("user-select", "none")
           .attr("dominant-baseline", "central")
           .attr("font-size","1px")
           .each(calculateTextSize)
