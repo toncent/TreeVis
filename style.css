@@ -8,6 +8,7 @@ body {
     height: 100vh; /* This is needed to overcome a Chrome bug. */
     width: 100vw;  /* As above. */
     -moz-user-select : none;
+    -webkit-user-select : none;
 }
 
 .main-canvas {

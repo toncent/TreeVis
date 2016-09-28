@@ -9,12 +9,7 @@ var lineGenerator;
  // create an svg element and add it to the body
 var svg = d3.select("body").append("svg")
     .attr("width", width)
-    .attr("height", height)
-    /*.call( //adds a listener for zoom events (e.g. scrolling the mouse wheel). also handles dragging
-      d3.zoom()
-        .on("zoom", zoomed)
-        .scaleExtent([0.2,2])
-    )*/;
+    .attr("height", height);
 
 // create group elements in the svg for links and nodes
 var svgLinkGroup = svg.append("g");
