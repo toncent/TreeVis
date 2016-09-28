@@ -10,11 +10,11 @@ var lineGenerator;
 var svg = d3.select("body").append("svg")
     .attr("width", width)
     .attr("height", height)
-    .call( //adds a listener for zoom events (e.g. scrolling the mouse wheel). also handles dragging
+    /*.call( //adds a listener for zoom events (e.g. scrolling the mouse wheel). also handles dragging
       d3.zoom()
         .on("zoom", zoomed)
         .scaleExtent([0.2,2])
-    );
+    )*/;
 
 // create group elements in the svg for links and nodes
 var svgLinkGroup = svg.append("g");
@@ -190,6 +190,7 @@ function updateTree(){
   newNodes.insert("text")
           .text(function(d) {return d.data.text})
           .attr("text-anchor","middle")
+          .attr("user-select", "none")
           .attr("dominant-baseline", "central")
           .attr("font-size","1px")
           .each(calculateTextSize)
@@ -244,6 +245,7 @@ function updateTree(){
   
   var texts = newPaths.insert("text")
         .attr("text-anchor", "middle")
+        .attr("user-select", "none")
         .attr("font-size", 25)
         .attr("opacity", 0);
       texts.insert("textPath")
