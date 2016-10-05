@@ -2,8 +2,18 @@
 <head>
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="style.css"/>
+    <link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
     <script src="d3.js"></script>
+    <script src="pageManipulation.js"></script>
 </head>
 <body>
-    <script src="script.js"></script>
+  <div class="w3-row" style="height: 100%">
+    <span class="w3-opennav w3-hide-medium w3-hide-large close-btn" id="openSideNav" onclick="openSideNav()">&#9776;</span>
+    <div class="w3-container w3-red w3-border w3-half w3-hide-small w3-animate-left left-container" id="leftContainer" style="height:100%">
+      <a onclick="closeSideNav()" class="w3-closenav w3-hide-medium w3-hide-large">&times;</a>
+    </div>
+    <div class="w3-container w3-rest" id="rightContainer" style="height:100%">
+      <script src="tree.js"></script>
+    </div>
+  </div>
 </body>

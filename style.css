@@ -32,3 +32,13 @@ text {
   stroke : #00f;
   fill : #00f;
 }
+
+.left-container{
+  height:100%;
+}
+
+.close-btn{
+  position: fixed; 
+  top: 10px; 
+  left: 10px;
+}
