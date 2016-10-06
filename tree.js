@@ -4,16 +4,16 @@
 var rightContainer = document.getElementById("rightContainer");
 var leftContainer = document.getElementById("leftContainer");
 var width, height;
-var treeRadius;
-var nodeSize;
+var treeRadius, leftTreeRadius;
+var rightNodeSize, leftNodeWidth, leftNodeHeight, gapHeight;
 
 var previousK = 0;
 var animationDuration = 400, zoomDuration = 150;
 var lineGenerator;
 
-var rightSVG;
-var svgLinkGroup;
-var svgNodeGroup;
+var rightSVG, leftSVG;
+var rightSvgLinkGroup;
+var rightSvgNodeGroup;
 
 var root, currentRoot;
 var tree;
@@ -30,8 +30,8 @@ setupD3Tree();
 //collapse the tree to only show the currentRoot and it's children
 currentRoot.children.forEach(collapseAllChildren);
 
-window.addEventListener("resize", initTree);
-initTree();
+window.addEventListener("resize", init);
+init();
 
 //---------------------------------------//
 // Functions
@@ -59,23 +59,34 @@ function setupD3Tree(){
 }
 
 function initHtmlElements(){
-  // create an svg element and add it to the body
-  rightSVG = d3.select(rightContainer).append("svg")
-    .attr("width", "100%")
-    .attr("height", "100%");
+  // create an svg element for the tree and add it to the body
+  rightSVG = d3.select(rightContainer)
+                .append("svg")
+                .attr("width", "100%")
+                .attr("height", "100%");
 
-  // create group elements in the svg for links and nodes
-  svgLinkGroup = rightSVG.append("g");
-  svgNodeGroup = rightSVG.append("g");
+  //create an svg element for the path
+  leftSVG = d3.select(leftContainer)
+              .append("svg")
+              .attr("width", "100%")
+              .attr("height", "100%");
+
+  // create group elements in the svgs for links and nodes
+  rightSvgLinkGroup = rightSVG.append("g");
+  rightSvgNodeGroup = rightSVG.append("g");
+
+  leftSvgLinkGroup = leftSVG.append("g");
+  leftSvgNodeGroup = leftSVG.append("g");
 }
 
-
-function initTree(){
+function init(){
   width = rightContainer.offsetWidth; 
   height = rightContainer.offsetHeight;
-  nodeSize = Math.min(width/10, height/10);
-  treeRadius = height > width ? width/2 - nodeSize * 1.5 : height/2 - nodeSize * 1.5;
-  updateTree();
+  rightNodeSize = Math.min(width/10, height/10);
+  leftNodeWidth = width/2;
+  treeRadius = height > width ? width/2 - rightNodeSize * 1.5 : height/2 - rightNodeSize * 1.5;
+  updateTree(currentRoot);
+  updatePath();
 }
 
 function generateRandomTree(){
@@ -93,31 +104,31 @@ function generateRandomTree(){
 }
 
 //calculates where to put each node using the layout d3 came up with as polar coordinates
-function calculateCoordinates(){
-  currentRoot.descendants().forEach(function(current){
+function calculateCoordinates(rootNode){
+  rootNode.descendants().forEach(function(current){
     var x = current.x;
     var y = current.y;
     current.x = Math.cos(x*2*Math.PI) * y * treeRadius + width / 2;
     current.y = Math.sin(x*2*Math.PI) * y * treeRadius + height / 2;
   })
-  currentRoot.x = width / 2;
-  currentRoot.y = height / 2;
+  rootNode.x = width / 2;
+  rootNode.y = height / 2;
 }
 
 //updates all the nodes and links when a zoom event has occured (zoom events also happen when dragging the tree around)
 function zoomed() {
   if (d3.event.transform.k != previousK) {
     //zoom behaviour
-    svgNodeGroup.transition()
+    rightSvgNodeGroup.transition()
       .duration(zoomDuration)
       .attr("transform", d3.event.transform);
-    svgLinkGroup.transition()
+    rightSvgLinkGroup.transition()
       .duration(zoomDuration)
       .attr("transform", d3.event.transform);
   } else {
     //drag behaviour
-    svgNodeGroup.attr("transform", d3.event.transform);
-    svgLinkGroup.attr("transform", d3.event.transform);
+    rightSvgNodeGroup.attr("transform", d3.event.transform);
+    rightSvgLinkGroup.attr("transform", d3.event.transform);
   }
   previousK = d3.event.transform.k;
 }
@@ -134,7 +145,8 @@ function nodeClicked(node){
       return;
     }
   }
-  updateTree();
+  updateTree(currentRoot);
+  updatePath();
 }
 
 function collapseSingleNode(node){
@@ -178,15 +190,15 @@ function getNodeColor(node){
   return "#000";
 }
 
-function updateTree(){
+function updateTree(rootNode){
 
   //calculate a new layout for the tree
-  tree(currentRoot);
+  tree(rootNode);
   //convert coordinates of all nodes for radial layout
-  calculateCoordinates();
+  calculateCoordinates(rootNode);
 
   // add all the nodes from the tree as circles to the svg node Group
-  var nodes = svgNodeGroup.selectAll("g").data(currentRoot.descendants(), function(d){return d.data.name});
+  var nodes = rightSvgNodeGroup.selectAll("g").data(rootNode.descendants(), function(d){return d.data.name});
   
   //transition existing nodes to their new positions
   nodes.transition()
@@ -199,9 +211,9 @@ function updateTree(){
   //update the sizes of existing nodes in case the screen size has changed
   nodes.each(function(d){
     if(d.data.type == 0){
-      d3.select(this).select("circle").attr("r", nodeSize);
+      d3.select(this).select("circle").attr("r", rightNodeSize);
     } else if(d.data.type == 1){
-      d3.select(this).select("ellipse").attr("rx", nodeSize).attr("ry", nodeSize);
+      d3.select(this).select("ellipse").attr("rx", rightNodeSize).attr("ry", rightNodeSize * 0.6);
     }
   });
 
@@ -222,10 +234,10 @@ function updateTree(){
     return d.data.type == 1;
   });
   newEllipseNodes.insert("ellipse")
-              .attr("rx", nodeSize)
-              .attr("ry", nodeSize * 0.6);
+              .attr("rx", rightNodeSize)
+              .attr("ry", rightNodeSize * 0.6);
   newCircleNodes.insert("circle") 
-            .attr("r", nodeSize);
+            .attr("r", rightNodeSize);
 
   //nodes get text applied to them
   newNodes.insert("text")
@@ -258,10 +270,10 @@ function updateTree(){
   //remove nodes that aren't supposed to be shown anymore
   nodes.exit().remove();
   
-  svgNodeGroup.selectAll("g").on("click", nodeClicked);
+  rightSvgNodeGroup.selectAll("g").on("click", nodeClicked);
 
   // add all the links from the tree to the svg link group
-  var links = svgLinkGroup.selectAll("path").data(currentRoot.links(), function(d){return d.target.id});
+  var links = rightSvgLinkGroup.selectAll("path").data(rootNode.links(), function(d){return d.target.id});
   
   //remove links that don't have a target anymore
   links.exit().remove();
@@ -271,7 +283,7 @@ function updateTree(){
 
   //update existing links to their new coordinates
   links.transition().duration(animationDuration)
-      .attr("d", getLine, lineGenerator, "asdf");//function(d){return lineGenerator([[d.source.x, d.source.y],[d.target.x, d.target.y]])});
+      .attr("d", getLine);//function(d){return lineGenerator([[d.source.x, d.source.y],[d.target.x, d.target.y]])});
 
   //give the new links a corresponding path in the svg and animate them
   links.enter().append("path")
@@ -292,4 +304,88 @@ function updateTree(){
     d.x0 = d.x;
     d.y0 = d.y;
   });
+}
+
+function updatePath(){
+  //create the path from the original root to the currently selected node
+  var path = root.path(currentRoot);
+  var links = [];
+  
+  //calculate the height of each node and the gap between nodes depending on how many nodes need to be shown
+  leftNodeHeight = height*0.75/path.length;
+  gapHeight = height*0.25/(path.length + 1);
+
+  for (var i=0; i<path.length; i++){
+    if (path[i+1]) links[i] = {source:{id: path[i].id, x: (width/2 - leftNodeWidth/2), y: ((i + 1) * gapHeight + i * leftNodeHeight)}, 
+                               target:{id: path[i+1].id, x: (width/2 - leftNodeWidth/2), y: ((i + 2) * gapHeight + (i + 1) * leftNodeHeight)}};
+  }
+  //get all the nodes in the svg and compare them with the new path
+  var nodes = leftSvgNodeGroup.selectAll("g").data(path, function(d){return d.data.name});
+  //update the positions and heights of already existing nodes
+  nodes.transition()
+      .duration(animationDuration)
+      .attr("transform", function(d, i){
+        return "translate(" + (width/2 - leftNodeWidth/2) + "," + ((i + 1) * gapHeight + i * leftNodeHeight) + ")"}
+      )
+
+
+  leftSvgNodeGroup.selectAll("rect")
+        .transition()
+        .duration(animationDuration)
+        .attr("width", leftNodeWidth)
+        .attr("height", leftNodeHeight);
+
+  //for every node that is new to the svg append a group element and give it the right coordinates
+  var newNodes = nodes.enter().append("g").attr("transform", function(d, i){
+        return "translate(" + (width/2 - leftNodeWidth/2) + "," + ((i + 1) * gapHeight + i * leftNodeHeight) + ")"}
+      );
+  //insert a rectangle into each new group node
+  newNodes.insert("rect")
+          .attr("width", leftNodeWidth)
+          .attr("height", leftNodeHeight);
+
+  nodes.selectAll("text")
+        .transition()
+        .duration(animationDuration)
+        .attr("transform", function(){
+          return "translate(" + leftNodeWidth/2 + "," + (leftNodeHeight/2 + this.getBBox().height/4) + ")";
+        });
+  newNodes.insert("text")
+          .text(function(d) {return d.data.text})
+          .attr("text-anchor","middle")
+          .attr("font-size","1px")
+          .each(calculateTextSize)
+          .attr("font-size", function(d){return d.fontSize})
+          .attr("transform", function(){
+            return "translate(" + leftNodeWidth/2 + "," + (leftNodeHeight/2 + this.getBBox().height/4) + ")";
+          });
+
+  //remove nodes that aren't in the path anymore
+  nodes.exit().remove();
+
+  //get all the lines in the svg and compare them to the new path
+  var lines = leftSvgLinkGroup.selectAll("path")
+              .data(links, function(d){
+                            return d.source.id + "-" + d.target.id;
+                          }
+              );
+  //update positions of lines that aren't new to the svg
+  lines.transition().duration(animationDuration).attr("d", getOverviewLine);
+
+  //insert lines for all new links in the path
+  lines.enter()
+      .append("path")
+      .attr("d", getOverviewLine)
+      .attr("opacity", 0)
+      .transition()
+      .delay(animationDuration)
+      .duration(animationDuration)
+      .attr("opacity", 1);
+
+  //remove lines that aren't in the path anymore
+  lines.exit().remove();
+}
+
+function getOverviewLine(link){
+  return lineGenerator([[link.source.x + leftNodeWidth / 2, link.source.y + leftNodeHeight], [link.target.x + leftNodeWidth / 2, link.target.y]]);
 }

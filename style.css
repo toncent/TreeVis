@@ -20,8 +20,13 @@ line {
   stroke : #000;
 }
 
-circle, rect, ellipse, path {
+circle, ellipse, path {
   stroke : #000;
+}
+
+rect {
+  fill: none;
+  stroke: #000;
 }
 
 path {
