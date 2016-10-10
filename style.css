@@ -25,7 +25,7 @@ circle, ellipse, path {
 }
 
 rect {
-  fill: none;
+  fill: #acf;
   stroke: #000;
 }
 
@@ -34,8 +34,8 @@ path {
 }
 
 text {
-  stroke : #00f;
-  fill : #00f;
+  stroke : #f0f;
+  fill : #f0f;
 }
 
 .left-container{

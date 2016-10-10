@@ -18,6 +18,8 @@ var rightSvgNodeGroup;
 var root, currentRoot;
 var tree;
 
+var longText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin posuere eu lectus vitae tincidunt. Maecenas finibus nec diam ac molestie."
+
 
 
 //---------------------------------------//
@@ -83,20 +85,20 @@ function init(){
   width = rightContainer.offsetWidth; 
   height = rightContainer.offsetHeight;
   rightNodeSize = Math.min(width/10, height/10);
-  leftNodeWidth = width/2;
+  leftNodeWidth = width*0.75;
   treeRadius = height > width ? width/2 - rightNodeSize * 1.5 : height/2 - rightNodeSize * 1.5;
   updateTree(currentRoot);
   updatePath();
 }
 
 function generateRandomTree(){
-  var nodes = [{"name" : "0", "parent": "", "type" : 0, "text" : "Node 1"}];
+  var nodes = [{"name" : "0", "parent": "", "type" : 0, "text" : "Node 1", "longText" : longText}];
   var currentNode = 0, currentNeighbor = 1, neighborCount, currentType;
   while(nodes.length < 400){
     neighborCount = 1 + Math.round(Math.random()*4);
     for (var i = 0; i < neighborCount; i++) {
       currentType = Math.round(Math.random())
-      nodes.push({"name" : ""+currentNeighbor++, "parent" : currentNode, "type" : currentType, "text" : "Node " + (currentNeighbor)});
+      nodes.push({"name" : ""+currentNeighbor++, "parent" : currentNode, "type" : currentType, "text" : "Node " + (currentNeighbor), "longText" : longText});
     }
     currentNode++;
   }
@@ -310,6 +312,13 @@ function updatePath(){
   //create the path from the original root to the currently selected node
   var path = root.path(currentRoot);
   var links = [];
+
+  //show path only if there is more than one node in it
+  if (path.length == 1) {
+    leftSvgNodeGroup.selectAll("g").remove();
+    leftSvgLinkGroup.selectAll("path").remove();
+    return;
+  };
   
   //calculate the height of each node and the gap between nodes depending on how many nodes need to be shown
   leftNodeHeight = height*0.75/path.length;
@@ -345,20 +354,17 @@ function updatePath(){
           .attr("height", leftNodeHeight);
 
   nodes.selectAll("text")
+        .text(function(d) {return d.data.longText})
+        .each(wrapText)
         .transition()
         .duration(animationDuration)
-        .attr("transform", function(){
-          return "translate(" + leftNodeWidth/2 + "," + (leftNodeHeight/2 + this.getBBox().height/4) + ")";
-        });
+        .attr("transform");
+        
   newNodes.insert("text")
-          .text(function(d) {return d.data.text})
+          .text(function(d) {return d.data.longText})
           .attr("text-anchor","middle")
-          .attr("font-size","1px")
-          .each(calculateTextSize)
-          .attr("font-size", function(d){return d.fontSize})
-          .attr("transform", function(){
-            return "translate(" + leftNodeWidth/2 + "," + (leftNodeHeight/2 + this.getBBox().height/4) + ")";
-          });
+          .attr("dy", "0.4em")
+          .each(wrapText);
 
   //remove nodes that aren't in the path anymore
   nodes.exit().remove();
@@ -388,4 +394,28 @@ function updatePath(){
 
 function getOverviewLine(link){
   return lineGenerator([[link.source.x + leftNodeWidth / 2, link.source.y + leftNodeHeight], [link.target.x + leftNodeWidth / 2, link.target.y]]);
+}
+
+function wrapText(){
+  var textElement = d3.select(this),
+      text = textElement.text(),
+      lineHeight = 1.1,
+      lineNumber = 1,
+      wordList = text.split(/\s+/).reverse(),
+      currentWord,
+      currentLine = [],
+      y = textElement.attr("y");
+
+  textElement.text(null);
+  var currentTspan = textElement.append("tspan").attr("x", leftNodeWidth/2).attr("y", 0).attr("dy", lineHeight + "em");
+  while (currentWord = wordList.pop()){
+    currentLine.push(currentWord);
+    currentTspan.text(currentLine.join(" "));
+    if (currentTspan.node().getComputedTextLength() > leftNodeWidth) {
+        currentLine.pop();
+        currentTspan.text(currentLine.join(" "));
+        currentLine = [currentWord];
+        currentTspan = textElement.append("tspan").attr("x", leftNodeWidth/2).attr("y", 0).attr("dy", ++lineNumber*lineHeight +"em");
+    };
+  }
 }
