@@ -8,7 +8,7 @@ var treeRadius, leftTreeRadius;
 var rightNodeSize, leftNodeWidth, leftNodeHeight, gapHeight;
 
 var previousK = 0;
-var animationDuration = 400, zoomDuration = 150;
+var animationDuration = 400;
 var lineGenerator;
 
 var rightSVG, leftSVG;
@@ -82,11 +82,33 @@ function initHtmlElements(){
 }
 
 function init(){
-  width = rightContainer.offsetWidth; 
-  height = rightContainer.offsetHeight;
+  //check if the right container is currently visible otherwise use the left container for width and height calculations
+  if (rightContainer.offsetWidth != 0) {
+    width = rightContainer.offsetWidth; 
+    height = rightContainer.offsetHeight;
+  } else {
+    width = leftContainer.offsetWidth; 
+    height = leftContainer.offsetHeight;
+  }
   rightNodeSize = Math.min(width/10, height/10);
   leftNodeWidth = width*0.75;
   treeRadius = height > width ? width/2 - rightNodeSize * 1.5 : height/2 - rightNodeSize * 1.5;
+  updateTree(currentRoot);
+  updatePath();
+}
+
+function nodeClicked(node){
+  if (node.children) {
+    collapseSingleNode(node);
+    if(node.parent) currentRoot = node.parent;
+  } else {
+    if (node.childrenBackup) {
+      currentRoot = node;
+      node.children = node.childrenBackup;
+    } else {
+      return;
+    }
+  }
   updateTree(currentRoot);
   updatePath();
 }
@@ -115,40 +137,6 @@ function calculateCoordinates(rootNode){
   })
   rootNode.x = width / 2;
   rootNode.y = height / 2;
-}
-
-//updates all the nodes and links when a zoom event has occured (zoom events also happen when dragging the tree around)
-function zoomed() {
-  if (d3.event.transform.k != previousK) {
-    //zoom behaviour
-    rightSvgNodeGroup.transition()
-      .duration(zoomDuration)
-      .attr("transform", d3.event.transform);
-    rightSvgLinkGroup.transition()
-      .duration(zoomDuration)
-      .attr("transform", d3.event.transform);
-  } else {
-    //drag behaviour
-    rightSvgNodeGroup.attr("transform", d3.event.transform);
-    rightSvgLinkGroup.attr("transform", d3.event.transform);
-  }
-  previousK = d3.event.transform.k;
-}
-
-function nodeClicked(node){
-  if (node.children) {
-    collapseSingleNode(node);
-    if(node.parent) currentRoot = node.parent;
-  } else {
-    if (node.childrenBackup) {
-      currentRoot = node;
-      node.children = node.childrenBackup;
-    } else {
-      return;
-    }
-  }
-  updateTree(currentRoot);
-  updatePath();
 }
 
 function collapseSingleNode(node){
@@ -312,13 +300,6 @@ function updatePath(){
   //create the path from the original root to the currently selected node
   var path = root.path(currentRoot);
   var links = [];
-
-  //show path only if there is more than one node in it
-  if (path.length == 1) {
-    leftSvgNodeGroup.selectAll("g").remove();
-    leftSvgLinkGroup.selectAll("path").remove();
-    return;
-  };
   
   //calculate the height of each node and the gap between nodes depending on how many nodes need to be shown
   leftNodeHeight = height*0.75/path.length;
@@ -353,12 +334,12 @@ function updatePath(){
           .attr("width", leftNodeWidth)
           .attr("height", leftNodeHeight);
 
+  //recalculate how to wrap the text to fit inside it's container
   nodes.selectAll("text")
         .text(function(d) {return d.data.longText})
         .each(wrapText)
         .transition()
-        .duration(animationDuration)
-        .attr("transform");
+        .duration(animationDuration);
         
   newNodes.insert("text")
           .text(function(d) {return d.data.longText})
@@ -404,18 +385,19 @@ function wrapText(){
       wordList = text.split(/\s+/).reverse(),
       currentWord,
       currentLine = [],
-      y = textElement.attr("y");
+      y = textElement.attr("y"),
+      topOffset = 0.5;
 
   textElement.text(null);
-  var currentTspan = textElement.append("tspan").attr("x", leftNodeWidth/2).attr("y", 0).attr("dy", lineHeight + "em");
+  var currentTspan = textElement.append("tspan").attr("x", leftNodeWidth/2).attr("y", 0).attr("dy", topOffset + lineHeight + "em");
   while (currentWord = wordList.pop()){
     currentLine.push(currentWord);
     currentTspan.text(currentLine.join(" "));
-    if (currentTspan.node().getComputedTextLength() > leftNodeWidth) {
+    if (currentTspan.node().getComputedTextLength() > leftNodeWidth*0.95) {
         currentLine.pop();
         currentTspan.text(currentLine.join(" "));
         currentLine = [currentWord];
-        currentTspan = textElement.append("tspan").attr("x", leftNodeWidth/2).attr("y", 0).attr("dy", ++lineNumber*lineHeight +"em");
+        currentTspan = textElement.append("tspan").attr("x", leftNodeWidth/2).attr("y", 0).attr("dy", ++lineNumber*lineHeight + topOffset + "em");
     };
   }
 }
