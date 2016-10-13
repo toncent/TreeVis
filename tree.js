@@ -5,7 +5,7 @@ var rightContainer = document.getElementById("rightContainer");
 var leftContainer = document.getElementById("leftContainer");
 var width, height;
 var treeRadius, leftTreeRadius;
-var rightNodeSize, leftNodeWidth, leftNodeHeight, gapHeight;
+var rightNodeSize, leftNodeWidth, leftNodeHeight, leftNodeExpandedHeight, gapHeight;
 
 var previousK = 0;
 var animationDuration = 400;
@@ -17,8 +17,10 @@ var rightSvgNodeGroup;
 
 var root, currentRoot;
 var tree;
+var expandedNode;
+var expandedNodeProcessed = false;
 
-var longText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin posuere eu lectus vitae tincidunt. Maecenas finibus nec diam ac molestie."
+var longText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin posuere eu lectus vitae tincidunt. Maecenas finibus nec diam ac molestie. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin posuere eu lectus vitae tincidunt. Maecenas finibus nec diam ac molestie. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin posuere eu lectus vitae tincidunt. Maecenas finibus nec diam ac molestie."
 
 
 
@@ -177,7 +179,7 @@ function getNodeColor(node){
   //the root gets red color
   if (node.id == currentRoot.id) return "#f00";
   //all other nodes get black color
-  return "#000";
+  return "#acf";
 }
 
 function updateTree(rootNode){
@@ -257,10 +259,12 @@ function updateTree(rootNode){
       return "translate(" + d.x + "," + d.y + ")"}
     )
     .attr("opacity", 1);
+
+  //give all new nodes a click listener
+  newNodes.on("click", nodeClicked);
+  
   //remove nodes that aren't supposed to be shown anymore
   nodes.exit().remove();
-  
-  rightSvgNodeGroup.selectAll("g").on("click", nodeClicked);
 
   // add all the links from the tree to the svg link group
   var links = rightSvgLinkGroup.selectAll("path").data(rootNode.links(), function(d){return d.target.id});
@@ -301,8 +305,15 @@ function updatePath(){
   var path = root.path(currentRoot);
   var links = [];
   
-  //calculate the height of each node and the gap between nodes depending on how many nodes need to be shown
+  //calculate the height of each node and the gap between nodes depending on 
+  //how many nodes need to be shown and whether there is an expanded node
   leftNodeHeight = height*0.75/path.length;
+  if (expandedNode) {
+    leftNodeExpandedHeight = expandedNode.necessaryHeight;
+    //reduce height of other nodes
+    leftNodeHeight -= (leftNodeExpandedHeight - leftNodeHeight)/(path.length - 1)
+  };
+  var gapSpace = height*0.25;
   gapHeight = height*0.25/(path.length + 1);
 
   for (var i=0; i<path.length; i++){
@@ -314,38 +325,48 @@ function updatePath(){
   //update the positions and heights of already existing nodes
   nodes.transition()
       .duration(animationDuration)
-      .attr("transform", function(d, i){
-        return "translate(" + (width/2 - leftNodeWidth/2) + "," + ((i + 1) * gapHeight + i * leftNodeHeight) + ")"}
-      )
-
+      .attr("transform", getLeftNodeTransform);
+  
+  //reset the expandedNodeProcessed variable which is used 
+  //to determin the correct translation for nodes in getLeftNodeTransform
+  expandedNodeProcessed = false;
+  
+  //for every node that is new to the svg append a group element and give it the right coordinates
+  var newNodes = nodes.enter().append("g").attr("transform", getNewLeftNodeTransform);
+  
+  //recalculate how to wrap the text to fit inside it's container
+  nodes.selectAll("text")
+        .text(function(d) {return d.data.longText})
+        .each(wrapText);
 
   leftSvgNodeGroup.selectAll("rect")
         .transition()
         .duration(animationDuration)
         .attr("width", leftNodeWidth)
-        .attr("height", leftNodeHeight);
+        .attr("height", getLeftNodeHeight);
 
-  //for every node that is new to the svg append a group element and give it the right coordinates
-  var newNodes = nodes.enter().append("g").attr("transform", function(d, i){
-        return "translate(" + (width/2 - leftNodeWidth/2) + "," + ((i + 1) * gapHeight + i * leftNodeHeight) + ")"}
-      );
-  //insert a rectangle into each new group node
-  newNodes.insert("rect")
-          .attr("width", leftNodeWidth)
-          .attr("height", leftNodeHeight);
+  //hide new nodes to fade them in later
+  newNodes.attr("opacity", 0);
 
-  //recalculate how to wrap the text to fit inside it's container
-  nodes.selectAll("text")
-        .text(function(d) {return d.data.longText})
-        .each(wrapText)
-        .transition()
-        .duration(animationDuration);
-        
   newNodes.insert("text")
           .text(function(d) {return d.data.longText})
           .attr("text-anchor","middle")
           .attr("dy", "0.4em")
           .each(wrapText);
+
+  //insert a rectangle into each new group node
+  newNodes.insert("rect", ":first-child")
+          .attr("width", leftNodeWidth)
+          .attr("height", getLeftNodeHeight);
+  
+  //fade in new nodes after old nodes have moved to new positions
+  newNodes.transition()
+          .duration(animationDuration)
+          .delay(animationDuration)
+          .attr("opacity", 1);
+
+  //give all new nodes a click listener
+  newNodes.on("click", expandTextBox);
 
   //remove nodes that aren't in the path anymore
   nodes.exit().remove();
@@ -377,10 +398,11 @@ function getOverviewLine(link){
   return lineGenerator([[link.source.x + leftNodeWidth / 2, link.source.y + leftNodeHeight], [link.target.x + leftNodeWidth / 2, link.target.y]]);
 }
 
-function wrapText(){
+//inserts line breaks into the text so it fits inside the corresponding rectangle
+function wrapText(data){
   var textElement = d3.select(this),
       text = textElement.text(),
-      lineHeight = 1.1,
+      lineHeight = 1.3,
       lineNumber = 1,
       wordList = text.split(/\s+/).reverse(),
       currentWord,
@@ -398,6 +420,62 @@ function wrapText(){
         currentTspan.text(currentLine.join(" "));
         currentLine = [currentWord];
         currentTspan = textElement.append("tspan").attr("x", leftNodeWidth/2).attr("y", 0).attr("dy", ++lineNumber*lineHeight + topOffset + "em");
-    };
+    }
   }
+  //save the height that is needed for all text to fit inside the rect
+  data.necessaryHeight = this.getBBox().height * 1.1;
+
+  if (this.getBBox().height > leftNodeHeight*0.75 && !data.isExpanded) {
+    //text is too long to fit in the rectangle -> remove lines until it fits
+    var tspans = textElement.selectAll("tspan");
+    while(this.getBBox().height > leftNodeHeight*0.75){
+      tspans.filter(":last-child").remove();
+    }
+    //change the last line to "..." to show that there is hidden text
+    tspans.filter(":last-child").text("...");
+  }
+}
+
+function expandTextBox(node){
+  if (node.isExpanded) {
+    //node is already expanded so shrink it again
+    node.isExpanded = false;
+    expandedNode = undefined;
+  } else {
+    node.isExpanded = true;
+    //if another node is currently expanded shrink it again
+    if(expandedNode) expandedNode.isExpanded = false;
+    //set the clicked node to be the currently expanded one
+    expandedNode = node;
+  }
+  updatePath();
+}
+
+//returns the transform string for the given node
+function getLeftNodeTransform(node, i){
+  var xTranslate, yTranslate;
+  xTranslate = width / 2 - leftNodeWidth / 2;
+  if (!expandedNodeProcessed) yTranslate = (i + 1) * gapHeight + i * leftNodeHeight;
+  else yTranslate = (i + 1) * gapHeight + i * leftNodeHeight + (leftNodeExpandedHeight - leftNodeHeight);
+  if (node.isExpanded){
+    expandedNodeProcessed = true;
+  }
+  return "translate(" + xTranslate + "," + yTranslate + ")";
+}
+
+//returns the correct height for the given node
+function getLeftNodeHeight(node){
+  var result = node.isExpanded ? leftNodeExpandedHeight : leftNodeHeight;
+  return result > node.necessaryHeight ? node.necessaryHeight : result;
+}
+
+function getNewLeftNodeTransform(d, i){
+  var xTranslate, yTranslate;
+  xTranslate = width/2 - leftNodeWidth/2;
+  if (!expandedNode) {
+    yTranslate = (i + 1) * gapHeight + i * leftNodeHeight;
+  } else {
+    yTranslate = yTranslate = (i + 1) * gapHeight + i * leftNodeHeight + (leftNodeExpandedHeight - leftNodeHeight);
+  }
+  return "translate(" + xTranslate + "," + yTranslate + ")";
 }

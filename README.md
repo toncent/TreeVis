@@ -7,6 +7,7 @@
   	- klicken auf die Wurzel zeigt wieder die vorherige Wurzel und ihre Kinder an
   - Die Beschriftung der Knoten wird aus dem data-Objekt des jeweiligen Knotens ausgelesen
   	- es wird zwischen Kurz- und Langform des Textes unterschieden
+  	- knoten die nicht den ganzen text anzeigen können mit einem klick/touch ausgeklappt werden
 
 # Designentscheidungen
  - (30/08/2016) Nachdem ich anfangs mit einem Canvas gearbeitet habe wechsle ich nun dazu den Baum durch ein SVG-Element anzuzeigen. Ich glaube, dass sich damit Animationen leichter realisieren lassen und dass nur wenige Knoten auf einmal auf dem Bildschirm zu sehen sein werden, wodurch der Performance Nachteil gegenüber einem Canvas nicht ins Gewicht fällt
