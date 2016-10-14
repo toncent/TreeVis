@@ -316,10 +316,6 @@ function updatePath(){
     leftNodeMaxHeight -= (leftNodeExpandedHeight - leftNodeMaxHeight)/(path.length - 1)
   };
 
-  for (var i=0; i<path.length; i++){
-    if (path[i+1]) links[i] = {source:{id: path[i].id, x: (width/2 - leftNodeWidth/2), y: ((i + 1) * gapHeight + i * leftNodeMaxHeight)}, 
-                               target:{id: path[i+1].id, x: (width/2 - leftNodeWidth/2), y: ((i + 2) * gapHeight + (i + 1) * leftNodeMaxHeight)}};
-  }
   //get all the nodes in the svg and compare them with the new path
   var nodes = leftSvgNodeGroup.selectAll("g").data(path, function(d){return d.data.name});
   
@@ -376,7 +372,15 @@ function updatePath(){
 
   //give all new nodes a click listener
   newNodes.on("click", expandTextBox);
-
+  
+  //create an array of links containing source and target points with their x/y position and id of the connected node
+  var sourceY = 0, targetY;
+  for (var i=0; i<path.length-1; i++){
+    sourceY += gapHeight + path[i].calculatedHeight;
+    links[i] = {source:{id: path[i].id, x: width/2, y: sourceY}, 
+                target:{id: path[i+1].id, x: width/2, y: sourceY + gapHeight}};
+  }
+  
   //get all the lines in the svg and compare them to the new path
   var lines = leftSvgLinkGroup.selectAll("path")
               .data(links, function(d){
@@ -384,12 +388,12 @@ function updatePath(){
                           }
               );
   //update positions of lines that aren't new to the svg
-  lines.transition().duration(animationDuration).attr("d", getOverviewLine);
+  lines.transition().duration(animationDuration).attr("d", getLine);
 
   //insert lines for all new links in the path
   lines.enter()
       .append("path")
-      .attr("d", getOverviewLine)
+      .attr("d", getLine)
       .attr("opacity", 0)
       .transition()
       .delay(animationDuration)
