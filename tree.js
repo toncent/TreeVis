@@ -32,7 +32,7 @@ fetchDataAndInitialize();
 //---------------------------------------//
 function fetchDataAndInitialize(){
   //load example tree data from json file
-  d3.json("http://10.200.1.56:8012/tree?hops=10&name=graphdiarrhea1").get(null, handleJsonResponse);
+  d3.json("http://10.200.1.56:8012/tree?hops=15&name=graphdiarrhea1").get(null, handleJsonResponse);
 }
 
 function handleJsonResponse(arr){
@@ -41,6 +41,7 @@ function handleJsonResponse(arr){
   initHtmlElements();
   setupD3Tree();
   setupD3Hierarchy(arr);
+  lineGenerator = d3.line();
   //collapse the tree to only show the currentRoot and it's children
   currentRoot.children.forEach(collapseAllChildren);
   window.addEventListener("resize", init);
@@ -168,24 +169,19 @@ function getLine(link){
 //decides the color of a node depending on its position in the tree
 function getNodeColor(node){
   //leafs get white color
-  if (!node.children && !node.childrenBackup) return "#fff";
-  //the root gets red color
-  if (node.data.properties.id == currentRoot.data.properties.id) return "#f00";
-  //all other nodes get black color
+  //if (!node.children && !node.childrenBackup) return "#fff";
+  //the root gets white color
+  if (node.data.properties.id == currentRoot.data.properties.id) return "#fff";
+  if (node.data.type == "diagnosis") return "#acf";
+  if (node.data.type == "symptom") return "#afc";
+  if (node.data.type == "examination") return "#fac";
+  if (node.data.type == "therapy") return "#caf";
   return "#acf";
 }
 
-function updateTree(rootNode){
-
-  //calculate a new layout for the tree
-  tree(rootNode);
-  //convert coordinates of all nodes for radial layout
-  calculateCoordinates(rootNode);
-
-  // add all the nodes from the tree as circles to the svg node Group
-  var nodes = rightSvgNodeGroup.selectAll("g").data(rootNode.descendants(), function(d){return d.data.properties.id});
-  
-  //transition existing nodes to their new positions
+//updates previously existing nodes to their new status
+function updateRightSvgNodes(nodes){
+  //transition existing nodes to their new positions and update their color
   nodes.transition()
       .duration(animationDuration)
       .attr("transform", function(d){
@@ -193,29 +189,19 @@ function updateTree(rootNode){
       )
       .attr("fill", getNodeColor);
 
-  //update the sizes of existing nodes in case the screen size has changed
-  nodes.each(function(d){
-    if(d.data.type == "diagnosis"){
-      d3.select(this).select("circle").attr("r", rightNodeSize);
-    } else if(d.data.type == "symptom"){
-      d3.select(this).select("circle").attr("r", rightNodeSize);
-    } else if(d.data.type == "examination"){
-      d3.select(this).select("circle").attr("r", rightNodeSize);
-    } else if(d.data.type == "therapy"){
-      d3.select(this).select("circle").attr("r", rightNodeSize);
-    }
-  });
+  //update the sizes of nodes in case the screen size has changed
+  nodes.selectAll("circle").attr("r", rightNodeSize);
 
   //update text sizes in case screen size has changed
   nodes.selectAll("text")
         .attr("font-size","1px")
         .each(calculateTextSize)
         .attr("font-size", function(d){return d.fontSize});
+}
 
-  //get all the nodes that have been added to the tree
-  var newNodes = nodes.enter().append("g");
-  
-  //nodes that weren't in the tree before get a shape in the svg
+//creates svg nodes for all the newly added nodes
+function createNewRightSvgNodes(newNodes){
+  //nodes get a shape in the svg
   newNodes.insert("circle") 
             .attr("r", rightNodeSize);
 
@@ -230,51 +216,73 @@ function updateTree(rootNode){
 
   //set the new nodes positions to their parents starting position
   newNodes.attr("transform", function(d){
-    if(d.parent){
-      d.x0 = d.parent.x;
-      d.y0 = d.parent.y;
-      return "translate(" + d.x0 + "," + d.y0 + ")";
-    }
-    else return "translate(" + d.x + "," + d.y + ")";
-  })
-  .attr("fill", getNodeColor)
-  .attr("opacity", 0)
-  //animate the node to go to it's correct position (starting from the parents previous position)
-  .transition()
-    .duration(animationDuration)
-    .delay(animationDuration)
-    .attr("transform", function(d){
-      return "translate(" + d.x + "," + d.y + ")"}
-    )
-    .attr("opacity", 1);
+              if(d.parent){
+                d.x0 = d.parent.x;
+                d.y0 = d.parent.y;
+                return "translate(" + d.x0 + "," + d.y0 + ")";
+              }
+              else return "translate(" + d.x + "," + d.y + ")";
+            })
+          .attr("fill", getNodeColor)
+          //animate the node to fade in and go to it's correct position (starting from the parents previous position)
+          .attr("opacity", 0)
+          .transition()
+            .duration(animationDuration)
+            .delay(animationDuration)
+            .attr("transform", function(d){
+              return "translate(" + d.x + "," + d.y + ")"}
+            )
+            .attr("opacity", 1)
+            //add the click listener after the animation has ended
+            .on("end", addClickListener);
+}
 
+function addClickListener(node){
   //give all new nodes a click listener
-  newNodes.on("click", nodeClicked);
+  d3.select(this).on("click", nodeClicked);
+}
+
+function updateRightSvgLinks(links){
+  //update links to their new coordinates
+  links.transition().duration(animationDuration)
+      .attr("d", getLine);
+}
+
+function createNewRightSvgLinks(newLinks){
+  //give new links a corresponding path in the svg and animate them
+  newLinks.attr("d", function(d){return lineGenerator([[d.source.x, d.source.y],[d.source.x, d.source.y]])})
+          .attr("id", function(d){return d.target.data.properties.id})
+          .transition()
+            .duration(animationDuration)
+            .delay(animationDuration)
+            .attr("d", getLine);
+}
+
+function updateTree(rootNode){
+
+  //calculate a new layout for the tree
+  tree(rootNode);
+  //convert coordinates of all nodes for radial layout
+  calculateCoordinates(rootNode);
+
+  // add all the nodes from the tree as circles to the svg node Group
+  var nodes = rightSvgNodeGroup.selectAll("g").data(rootNode.descendants(), function(d){return d.data.properties.id});
+  updateRightSvgNodes(nodes);
+
+  //get all the nodes that have been added to the tree
+  var newNodes = nodes.enter().append("g");
+  createNewRightSvgNodes(newNodes);
   
   //remove nodes that aren't supposed to be shown anymore
   nodes.exit().remove();
 
   // add all the links from the tree to the svg link group
   var links = rightSvgLinkGroup.selectAll("path").data(rootNode.links(), function(d){return d.target.data.properties.id});
-  
+  updateRightSvgLinks(links);
+  var newLinks = links.enter().append("path");
+  createNewRightSvgLinks(newLinks);
   //remove links that don't have a target anymore
   links.exit().remove();
-
-  //create a new line generator
-  if(!lineGenerator) lineGenerator = d3.line();
-
-  //update existing links to their new coordinates
-  links.transition().duration(animationDuration)
-      .attr("d", getLine);//function(d){return lineGenerator([[d.source.x, d.source.y],[d.target.x, d.target.y]])});
-
-  //give the new links a corresponding path in the svg and animate them
-  links.enter().append("path")
-      .attr("d", function(d){return lineGenerator([[d.source.x, d.source.y],[d.source.x, d.source.y]])})
-      .attr("id", function(d){return d.target.data.properties.id})
-      .transition()
-        .duration(animationDuration)
-        .delay(animationDuration)
-        .attr("d", getLine);
 
   //backup the current positions for animations
   nodes.each(function(d){
