@@ -4,8 +4,8 @@
 var rightContainer = document.getElementById("rightContainer");
 var leftContainer = document.getElementById("leftContainer");
 var width, height;
-var treeRadius, leftTreeRadius;
-var rightNodeSize, leftNodeWidth, leftNodeMaxHeight, leftNodeExpandedHeight, gapHeight;
+var treeWidth, treeHeight;
+var rightNodeHeight, rightNodeWidth, leftNodeWidth, leftNodeMaxHeight, leftNodeExpandedHeight, gapHeight;
 
 var previousK = 0;
 var animationDuration = 400;
@@ -25,6 +25,7 @@ var leftNodesAccumulatedHeight;
 var lineHeight = 1.3; //em
 var captionOffset = 2.3;//em
 var textBoxPadding = 10; //px
+var calculatingRightSide;
 
 //---------------------------------------//
 // Initialization
@@ -63,16 +64,17 @@ function setupD3Hierarchy(arr){
   currentRoot = root;
   currentRoot.x0 = width/2;
   currentRoot.y0 = height/2;
+  currentRoot.descendants().forEach(initializeNode);
+}
+
+function initializeNode(node){
+  node.left = {};
+  node.right = {};
 }
 
 function setupD3Tree(){
   // create a new d3 tree
-  tree = d3.tree()
-          .separation( //defines how far nodes should be apart from each other
-            function separation(a, b) {
-              return (a.parent == b.parent ? .4 : 2) / a.depth;
-            }
-          );
+  tree = d3.tree();
 }
 
 function initHtmlElements(){
@@ -105,18 +107,27 @@ function init(){
     width = leftContainer.offsetWidth; 
     height = leftContainer.offsetHeight;
   }
-  rightNodeSize = Math.min(width/10, height/10);
-  leftNodeWidth = width*0.75;
-  treeRadius = height > width ? width/2 - rightNodeSize * 1.5 : height/2 - rightNodeSize * 1.5;
+
+  //right half initialization
+  rightNodeWidth = width*0.35;
+  rightNodeHeight = height*0.25;
+  treeWidth = width/2 - rightNodeWidth*0.75;
+  treeHeight = height/2 - rightNodeHeight*0.75;
   updateTree(currentRoot);
+
+  //left half initialization
+  leftNodeWidth = width*0.75;
   updatePath();
 }
 
 function nodeClicked(node){
-  if (node == currentRoot) {
+  //if the current root is clicked then hide it's children and make it's parent 
+  //the root unless the clicked node is the root of the whole tree with hidden children.
+  if (node == currentRoot && (node.children || node.parent)) {
     collapseSingleNode(node);
     if(node.parent) currentRoot = node.parent;
   } else {
+    //make the clicked node the new root and show its children
     currentRoot = node;
     if (node.childrenBackup) {
       node.children = node.childrenBackup;
@@ -131,8 +142,8 @@ function calculateCoordinates(rootNode){
   rootNode.descendants().forEach(function(current){
     var x = current.x;
     var y = current.y;
-    current.x = Math.cos(x*2*Math.PI) * y * treeRadius + width / 2;
-    current.y = Math.sin(x*2*Math.PI) * y * treeRadius + height / 2;
+    current.x = Math.cos(x*2*Math.PI) * y * treeWidth + width / 2;
+    current.y = Math.sin(x*2*Math.PI) * y * treeHeight + height / 2;
   })
   rootNode.x = width / 2;
   rootNode.y = height / 2;
@@ -171,15 +182,13 @@ function getLine(link){
 
 //decides the color of a node depending on its position in the tree
 function getNodeColor(node){
-  //leafs get white color
-  //if (!node.children && !node.childrenBackup) return "#fff";
   //the root gets white color
   if (node.data.properties.id == currentRoot.data.properties.id) return "#fff";
-  if (node.data.type == "diagnosis") return "#acf";
-  if (node.data.type == "symptom") return "#afc";
-  if (node.data.type == "examination") return "#fac";
-  if (node.data.type == "therapy") return "#caf";
-  return "#acf";
+  if (node.data.type == "diagnosis") return "#a0f";
+  if (node.data.type == "symptom") return "#af0";
+  if (node.data.type == "examination") return "#fa0";
+  if (node.data.type == "therapy") return "#0af";
+  return "#a0f";
 }
 
 //updates previously existing nodes to their new status
@@ -188,43 +197,40 @@ function updateRightSvgNodes(nodes){
   nodes.transition()
       .duration(animationDuration)
       .attr("transform", function(d){
-        return "translate(" + d.x + "," + d.y + ")"}
+        return "translate(" + (d.x - rightNodeWidth/2) + "," + (d.y - rightNodeHeight/2) + ")"}
       )
       .attr("fill", getNodeColor);
 
   //update the sizes of nodes in case the screen size has changed
-  nodes.selectAll("circle").attr("r", rightNodeSize);
+  nodes.selectAll("rect")
+       .attr("width", rightNodeWidth)
+       .attr("height", rightNodeHeight);
 
   //update text sizes in case screen size has changed
-  nodes.selectAll("text")
-        .attr("font-size","1px")
-        .each(calculateTextSize)
-        .attr("font-size", function(d){return d.fontSize});
+  nodes.selectAll("text");
 }
 
 //creates svg nodes for all the newly added nodes
 function createNewRightSvgNodes(newNodes){
-  //nodes get a shape in the svg
-  newNodes.insert("circle") 
-            .attr("r", rightNodeSize);
-
   //nodes get text applied to them
   newNodes.insert("text")
           .text(function(d) {return d.data.name})
           .attr("text-anchor","middle")
-          .attr("dominant-baseline", "central")
-          .attr("font-size","1px")
-          .each(calculateTextSize)
-          .attr("font-size", function(d){return d.fontSize});
+          .each(fillWithText);
+  
+  //nodes get a shape in the svg
+  newNodes.insert("rect", "text") 
+            .attr("width", rightNodeWidth)
+            .attr("height", rightNodeHeight);
 
   //set the new nodes positions to their parents starting position
   newNodes.attr("transform", function(d){
               if(d.parent){
                 d.x0 = d.parent.x;
                 d.y0 = d.parent.y;
-                return "translate(" + d.x0 + "," + d.y0 + ")";
+                return "translate(" + (d.x0 - rightNodeWidth/2) + "," + (d.y0 - rightNodeHeight/2) + ")";
               }
-              else return "translate(" + d.x + "," + d.y + ")";
+              else return "translate(" + (d.x - rightNodeWidth/2) + "," + (d.y - rightNodeHeight/2) + ")";
             })
           .attr("fill", getNodeColor)
           //animate the node to fade in and go to it's correct position (starting from the parents previous position)
@@ -233,7 +239,7 @@ function createNewRightSvgNodes(newNodes){
             .duration(animationDuration)
             .delay(animationDuration)
             .attr("transform", function(d){
-              return "translate(" + d.x + "," + d.y + ")"}
+              return "translate(" + (d.x - rightNodeWidth/2) + "," + (d.y - rightNodeHeight/2) + ")"}
             )
             .attr("opacity", 1)
             //add the click listener after the animation has ended
@@ -262,7 +268,7 @@ function createNewRightSvgLinks(newLinks){
 }
 
 function updateTree(rootNode){
-
+  calculatingRightSide = true;
   //calculate a new layout for the tree
   tree(rootNode);
   //convert coordinates of all nodes for radial layout
@@ -300,6 +306,7 @@ function updateTree(rootNode){
 }
 
 function updatePath(){
+  calculatingRightSide = false;
   //create the path from the original root to the currently selected node
   var path = root.path(currentRoot);
   var links = [];
@@ -308,7 +315,7 @@ function updatePath(){
   //how many nodes need to be shown and whether there is an expanded node
   leftNodeMaxHeight = height*0.75/path.length;
   if (expandedNode) {
-    leftNodeExpandedHeight = expandedNode.necessaryHeight;
+    leftNodeExpandedHeight = expandedNode.left.necessaryHeight;
     //reduce height of other nodes
     leftNodeMaxHeight -= (leftNodeExpandedHeight - leftNodeMaxHeight)/(path.length - 1)
   };
@@ -325,7 +332,7 @@ function updatePath(){
                 if(d.data.properties.description) return d.data.properties.description
                 else return d.data.name
               })
-        .each(wrapText);
+        .each(fillWithText);
 
   //reset accumulated height
   leftNodesAccumulatedHeight = 0;
@@ -334,7 +341,8 @@ function updatePath(){
         .transition()
         .duration(animationDuration)
         .attr("width", leftNodeWidth)
-        .attr("height", getLeftNodeHeight);
+        .attr("height", getLeftNodeHeight)
+        .attr("fill", getNodeColor);
   
   //for every node that is new to the svg append a group element
   var newNodes = nodes.enter().append("g");
@@ -346,12 +354,13 @@ function updatePath(){
                 if(d.data.properties.description) return d.data.properties.description
                 else return d.data.name
               })
-          .each(wrapText);
+          .each(fillWithText);
   
   //insert a rectangle into each new group node
   newNodes.insert("rect", "text")
           .attr("width", leftNodeWidth)
-          .attr("height", getLeftNodeHeight);
+          .attr("height", getLeftNodeHeight)
+          .attr("fill", getNodeColor);
 
   
   //move nodes to the correct positions
@@ -411,49 +420,51 @@ function getOverviewLine(link){
 }
 
 //inserts line breaks into the text so it fits inside the corresponding rectangle
-function wrapText(data){
+function fillWithText(node){
   var textElement = d3.select(this),
-      text = data.data.properties.description,
+      text = node.data.properties.description,
       lineNumber = 1,
       wordList = text.split(/\s+/).reverse(),
       currentWord,
       currentLine = [],
       y = textElement.attr("y"),
-      topOffset = 0.5;
+      topOffset = 0.5,
+      nodeWidth = calculatingRightSide ? rightNodeWidth : leftNodeWidth,
+      nodeHeight = calculatingRightSide ? rightNodeHeight : leftNodeMaxHeight;
 
   //remove all previous text
   textElement.text(null);
   
   //add the caption to the text element
   textElement.append("tspan")
-             .attr("x", leftNodeWidth/2)
+             .attr("x", nodeWidth/2)
              .attr("y", 0)
              .attr("dy", lineHeight + "em")
              .attr("font-size", "1.5em")
-             .text(data.data.name);
+             .text(node.data.name);
 
   //add tspans for each line and fill them word-by-word until no more words can fit into that line
   var currentTspan = textElement.append("tspan")
-                                .attr("x", leftNodeWidth/2)
+                                .attr("x", nodeWidth/2)
                                 .attr("y", 0)
                                 .attr("dy",  (captionOffset + lineHeight) + "em");
   while (currentWord = wordList.pop()){
     currentLine.push(currentWord);
     currentTspan.text(currentLine.join(" "));
-    if (currentTspan.node().getComputedTextLength() > leftNodeWidth*0.95) {
+    if (currentTspan.node().getComputedTextLength() > nodeWidth*0.95) {
         currentLine.pop();
         currentTspan.text(currentLine.join(" "));
         currentLine = [currentWord];
-        currentTspan = textElement.append("tspan").attr("x", leftNodeWidth/2).attr("y", 0).attr("dy", (++lineNumber*lineHeight + captionOffset) + "em");
+        currentTspan = textElement.append("tspan").attr("x", nodeWidth/2).attr("y", 0).attr("dy", (++lineNumber*lineHeight + captionOffset) + "em");
     }
   }
   //save the height that is needed for all text to fit inside the rect
-  data.necessaryHeight = this.getBBox().height;
+  node.left.necessaryHeight = this.getBBox().height;
 
-  if (this.getBBox().height > leftNodeMaxHeight && !data.isExpanded) {
+  if (this.getBBox().height > nodeHeight*0.95 && !node.left.isExpanded) {
     //text is too long to fit in the rectangle -> remove lines until it fits
     var tspans = textElement.selectAll("tspan");
-    while(this.getBBox().height > leftNodeMaxHeight){
+    while(this.getBBox().height > nodeHeight*0.95){
       tspans.filter(":last-child").remove();
     }
     //change the last line to "..." to show that there is hidden text
@@ -462,14 +473,14 @@ function wrapText(data){
 }
 
 function expandTextBox(node){
-  if (node.isExpanded) {
+  if (node.left.isExpanded) {
     //node is already expanded so shrink it again
-    node.isExpanded = false;
+    node.left.isExpanded = false;
     expandedNode = undefined;
   } else {
-    node.isExpanded = true;
+    node.left.isExpanded = true;
     //if another node is currently expanded shrink it again
-    if(expandedNode) expandedNode.isExpanded = false;
+    if(expandedNode) expandedNode.left.isExpanded = false;
     //set the clicked node to be the currently expanded one
     expandedNode = node;
   }
@@ -478,8 +489,8 @@ function expandTextBox(node){
 
 //returns the correct height for the given node
 function getLeftNodeHeight(node){
-  var result = node.isExpanded ? leftNodeExpandedHeight : leftNodeMaxHeight;
-  result = result > node.necessaryHeight ? node.necessaryHeight : result;
+  var result = node.left.isExpanded ? leftNodeExpandedHeight : leftNodeMaxHeight;
+  result = result > node.left.necessaryHeight ? node.left.necessaryHeight : result;
   node.calculatedHeight = result;
 
   //increase accumulated height by the height of this node
