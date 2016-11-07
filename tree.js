@@ -22,6 +22,9 @@ var leftNodeTranslateY;
 //accumulated height to determine gaps between nodes
 var leftNodesAccumulatedHeight;
 
+var lineHeight = 1.3; //em
+var captionOffset = 2.3;//em
+
 //---------------------------------------//
 // Initialization
 //---------------------------------------//
@@ -32,7 +35,8 @@ fetchDataAndInitialize();
 //---------------------------------------//
 function fetchDataAndInitialize(){
   //load example tree data from json file
-  d3.json("http://10.200.1.56:8012/tree?hops=15&name=graphdiarrhea1").get(null, handleJsonResponse);
+  //d3.json("http://10.200.1.56:8012/tree?hops=15&name=graphdiarrhea1").get(null, handleJsonResponse);
+  d3.json("exampleTree.json").get(null, handleJsonResponse);
 }
 
 function handleJsonResponse(arr){
@@ -338,16 +342,15 @@ function updatePath(){
   
   //calculate text wrapping for all new nodes
   newNodes.insert("text")
+          .attr("text-anchor","middle")
           .text(function(d) {
                 if(d.data.properties.description) return d.data.properties.description
                 else return d.data.name
               })
-          .attr("text-anchor","middle")
-          .attr("dy", "0.4em")
           .each(wrapText);
   
   //insert a rectangle into each new group node
-  newNodes.insert("rect", ":first-child")
+  newNodes.insert("rect", "text")
           .attr("width", leftNodeWidth)
           .attr("height", getLeftNodeHeight);
 
@@ -411,8 +414,7 @@ function getOverviewLine(link){
 //inserts line breaks into the text so it fits inside the corresponding rectangle
 function wrapText(data){
   var textElement = d3.select(this),
-      text = textElement.text(),
-      lineHeight = 1.3,
+      text = data.data.properties.description,
       lineNumber = 1,
       wordList = text.split(/\s+/).reverse(),
       currentWord,
@@ -420,8 +422,22 @@ function wrapText(data){
       y = textElement.attr("y"),
       topOffset = 0.5;
 
+  //remove all previous text
   textElement.text(null);
-  var currentTspan = textElement.append("tspan").attr("x", leftNodeWidth/2).attr("y", 0).attr("dy", topOffset + lineHeight + "em");
+  
+  //add the caption to the text element
+  textElement.append("tspan")
+             .attr("x", leftNodeWidth/2)
+             .attr("y", 0)
+             .attr("dy", lineHeight + "em")
+             .attr("font-size", "1.5em")
+             .text(data.data.name);
+
+  //add tspans for each line and fill them word-by-word until no more words can fit into that line
+  var currentTspan = textElement.append("tspan")
+                                .attr("x", leftNodeWidth/2)
+                                .attr("y", 0)
+                                .attr("dy",  (captionOffset + lineHeight) + "em");
   while (currentWord = wordList.pop()){
     currentLine.push(currentWord);
     currentTspan.text(currentLine.join(" "));
@@ -429,11 +445,11 @@ function wrapText(data){
         currentLine.pop();
         currentTspan.text(currentLine.join(" "));
         currentLine = [currentWord];
-        currentTspan = textElement.append("tspan").attr("x", leftNodeWidth/2).attr("y", 0).attr("dy", ++lineNumber*lineHeight + topOffset + "em");
+        currentTspan = textElement.append("tspan").attr("x", leftNodeWidth/2).attr("y", 0).attr("dy", (++lineNumber*lineHeight + captionOffset) + "em");
     }
   }
   //save the height that is needed for all text to fit inside the rect
-  data.necessaryHeight = this.getBBox().height * 1.3;
+  data.necessaryHeight = this.getBBox().height;
 
   if (this.getBBox().height > leftNodeMaxHeight*0.75 && !data.isExpanded) {
     //text is too long to fit in the rectangle -> remove lines until it fits
@@ -469,7 +485,7 @@ function getLeftNodeHeight(node){
 
   //increase accumulated height by the height of this node
   leftNodesAccumulatedHeight += result;
-  return result;
+  return result + lineHeight*16;
 }
 
 function getLeftNodeTransform(node, i){
