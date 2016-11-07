@@ -24,6 +24,7 @@ var leftNodesAccumulatedHeight;
 
 var lineHeight = 1.3; //em
 var captionOffset = 2.3;//em
+var textBoxPadding = 10; //px
 
 //---------------------------------------//
 // Initialization
@@ -112,15 +113,13 @@ function init(){
 }
 
 function nodeClicked(node){
-  if (node.children) {
+  if (node == currentRoot) {
     collapseSingleNode(node);
     if(node.parent) currentRoot = node.parent;
   } else {
+    currentRoot = node;
     if (node.childrenBackup) {
-      currentRoot = node;
       node.children = node.childrenBackup;
-    } else {
-      return;
     }
   }
   updateTree(currentRoot);
@@ -451,10 +450,10 @@ function wrapText(data){
   //save the height that is needed for all text to fit inside the rect
   data.necessaryHeight = this.getBBox().height;
 
-  if (this.getBBox().height > leftNodeMaxHeight*0.75 && !data.isExpanded) {
+  if (this.getBBox().height > leftNodeMaxHeight && !data.isExpanded) {
     //text is too long to fit in the rectangle -> remove lines until it fits
     var tspans = textElement.selectAll("tspan");
-    while(this.getBBox().height > leftNodeMaxHeight*0.75){
+    while(this.getBBox().height > leftNodeMaxHeight){
       tspans.filter(":last-child").remove();
     }
     //change the last line to "..." to show that there is hidden text
