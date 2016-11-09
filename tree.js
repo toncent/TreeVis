@@ -37,8 +37,8 @@ fetchDataAndInitialize();
 //---------------------------------------//
 function fetchDataAndInitialize(){
   //load example tree data from json file
-  //d3.json("http://10.200.1.56:8012/tree?hops=15&name=graphdiarrhea1").get(null, handleJsonResponse);
-  d3.json("exampleTree.json").get(null, handleJsonResponse);
+  d3.json("http://10.200.1.75:8012/tree?hops=15&name=graphdiarrhea1").get(null, handleJsonResponse);
+  //d3.json("exampleTree.json").get(null, handleJsonResponse);
 }
 
 function handleJsonResponse(arr){
@@ -109,10 +109,10 @@ function init(){
   }
 
   //right half initialization
-  rightNodeWidth = width*0.35;
+  rightNodeWidth = width*0.30;
   rightNodeHeight = height*0.25;
-  treeWidth = width/2 - rightNodeWidth*0.75;
-  treeHeight = height/2 - rightNodeHeight*0.75;
+  treeWidth = width/2 - rightNodeWidth*0.55;
+  treeHeight = height/2 - rightNodeHeight*0.55;
   updateTree(currentRoot);
 
   //left half initialization
@@ -164,9 +164,7 @@ function collapseAllChildren(node){
 }
 
 function calculateTextSize(d){
-  var boundingBox = this.getBBox();
-  var parentBox = this.parentNode.getBBox();
-  d.fontSize = Math.min(parentBox.width / boundingBox.width, parentBox.height / boundingBox.height)*0.8 + "px";
+  d.fontSize = (rightNodeWidth / this.getComputedTextLength())*0.9;
 }
 
 //creates a line using d3.line() according to the links source and target
@@ -440,8 +438,11 @@ function fillWithText(node){
              .attr("x", nodeWidth/2)
              .attr("y", 0)
              .attr("dy", lineHeight + "em")
-             .attr("font-size", "1.5em")
-             .text(node.data.name);
+             .attr("font-size", "1em")
+             .text(node.data.name)
+             .attr("font-style", "italic")
+             .each(calculateTextSize)
+             .attr("font-size", function(d) {return Math.min(1.3, d.fontSize) + "em"});
 
   //add tspans for each line and fill them word-by-word until no more words can fit into that line
   var currentTspan = textElement.append("tspan")
