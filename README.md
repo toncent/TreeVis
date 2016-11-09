@@ -14,4 +14,8 @@
 
  - (28.9.2016) Zoom und Drag Events auf dem großen Haupt-Baum werden ignoriert, weil sie keine Erleichterung in der Benutzung bewirken, sondern eher das Gegenteil. Meist wird der Baum nur verschoben, wenn man eigentlich einen Knoten antippen wollte und Zoomen ist überflüssig, weil die Knoten von Anfang an groß genug dargestellt werden.
 
- - (07.11.2016) Knoten erhalten ein right- und ein left-objekt, in dem jeweils relevante daten für die anzeige auf der rechten/linken seite gespeichert werden.
+ - (07.11.2016) Knoten erhalten ein left-objekt, in dem relevante daten für die anzeige auf der linken seite gespeichert werden.
+
+ - (09.11.2016) Knoten auf der rechten Seite haben eine konstante Größe und überlappender Text wird abgeschnitten. Kompletter Text kann dann auf der rechten Seite eingesehen werden
+
+
