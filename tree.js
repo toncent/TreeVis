@@ -203,9 +203,6 @@ function updateRightSvgNodes(nodes){
   nodes.selectAll("rect")
        .attr("width", rightNodeWidth)
        .attr("height", rightNodeHeight);
-
-  //update text sizes in case screen size has changed
-  nodes.selectAll("text");
 }
 
 //creates svg nodes for all the newly added nodes
@@ -380,7 +377,7 @@ function updatePath(){
           .attr("opacity", 1);
 
   //give all new nodes a click listener
-  newNodes.on("click", expandTextBox);
+  newNodes.on("click", leftNodeClicked);
   
   //create an array of links containing source and target points with their x/y position and id of the connected node
   var sourceY = 0, targetY;
@@ -459,11 +456,15 @@ function fillWithText(node){
         currentTspan = textElement.append("tspan").attr("x", nodeWidth/2).attr("y", 0).attr("dy", (++lineNumber*lineHeight + captionOffset) + "em");
     }
   }
-  //save the height that is needed for all text to fit inside the rect
-  node.left.necessaryHeight = this.getBBox().height;
+  
+  //apply special treatment for left and right side nodes
+  if (!calculatingRightSide){
+    //save the height that is needed for all text to fit inside the rect
+    node.left.necessaryHeight = this.getBBox().height;
+  }
 
-  if (this.getBBox().height > nodeHeight*0.95 && !node.left.isExpanded) {
-    //text is too long to fit in the rectangle -> remove lines until it fits
+  //text that is too long is shortened for all nodes on the right side and for all not-expanded nodes on the left side
+  if (this.getBBox().height > nodeHeight*0.95 && (!node.left.isExpanded || calculatingRightSide)) {
     var tspans = textElement.selectAll("tspan");
     while(this.getBBox().height > nodeHeight*0.95){
       tspans.filter(":last-child").remove();
@@ -473,19 +474,28 @@ function fillWithText(node){
   }
 }
 
-function expandTextBox(node){
-  if (node.left.isExpanded) {
-    //node is already expanded so shrink it again
-    node.left.isExpanded = false;
-    expandedNode = undefined;
-  } else {
+function leftNodeClicked(node){
+  jumpToNode(node);
+  if (!node.left.isExpanded) {
     node.left.isExpanded = true;
     //if another node is currently expanded shrink it again
     if(expandedNode) expandedNode.left.isExpanded = false;
     //set the clicked node to be the currently expanded one
     expandedNode = node;
   }
+  updateTree(currentRoot);
   updatePath();
+}
+
+//makes the given node the current root
+function jumpToNode(node){
+  if (node == currentRoot) return;
+  collapseSingleNode(currentRoot);
+  if (node.childrenBackup) {
+      node.children = node.childrenBackup;
+  }
+  currentRoot = node;
+  currentRoot.children.forEach(collapseAllChildren);
 }
 
 //returns the correct height for the given node
