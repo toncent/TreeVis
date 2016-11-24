@@ -203,6 +203,10 @@ function updateRightSvgNodes(nodes){
   nodes.selectAll("rect")
        .attr("width", rightNodeWidth)
        .attr("height", rightNodeHeight);
+
+  //update text wrapping and shortening
+  nodes.selectAll("text")
+      .each(fillWithText);
 }
 
 //creates svg nodes for all the newly added nodes
@@ -454,6 +458,7 @@ function fillWithText(node){
         currentTspan.text(currentLine.join(" "));
         currentLine = [currentWord];
         currentTspan = textElement.append("tspan").attr("x", nodeWidth/2).attr("y", 0).attr("dy", (++lineNumber*lineHeight + captionOffset) + "em");
+        currentTspan.text(currentLine.join(" "));
     }
   }
   
