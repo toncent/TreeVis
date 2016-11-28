@@ -8,7 +8,7 @@ var treeWidth, treeHeight;
 var rightNodeHeight, rightNodeWidth, leftNodeWidth, leftNodeMaxHeight, leftNodeExpandedHeight, gapHeight;
 
 var previousK = 0;
-var animationDuration = 400;
+var animationDuration = 400, longPressDuration = 500;
 var lineGenerator;
 
 var rightSVG, leftSVG;
@@ -26,6 +26,9 @@ var lineHeight = 1.3; //em
 var captionOffset = 2.3;//em
 var textBoxPadding = 10; //px
 var calculatingRightSide;
+
+var longPressTimeout;
+var dragStartY, translationY = 0;
 
 //---------------------------------------//
 // Initialization
@@ -206,7 +209,8 @@ function updateRightSvgNodes(nodes){
 
   //update text wrapping and shortening
   nodes.selectAll("text")
-      .each(fillWithText);
+        .attr("text-anchor","middle")
+        .each(fillWithText);
 }
 
 //creates svg nodes for all the newly added nodes
@@ -470,37 +474,49 @@ function fillWithText(node){
 
   //text that is too long is shortened for all nodes on the right side and for all not-expanded nodes on the left side
   if (this.getBBox().height > nodeHeight*0.95 && (!node.left.isExpanded || calculatingRightSide)) {
+    node.left.hasHiddenText = true;
     var tspans = textElement.selectAll("tspan");
     while(this.getBBox().height > nodeHeight*0.95){
       tspans.filter(":last-child").remove();
     }
     //change the last line to "..." to show that there is hidden text
     tspans.filter(":last-child").text("...");
+  } else {
+    node.left.hasHiddenText = false;
   }
 }
 
 function leftNodeClicked(node){
-  jumpToNode(node);
-  if (!node.left.isExpanded) {
+  var changed = false;
+  //expand the clicked node if it has hidden text
+  if (!node.left.isExpanded && node.left.hasHiddenText) {
+    changed = true;
     node.left.isExpanded = true;
     //if another node is currently expanded shrink it again
     if(expandedNode) expandedNode.left.isExpanded = false;
     //set the clicked node to be the currently expanded one
     expandedNode = node;
+  } else {
+    changed = jumpToNode(node);
   }
-  updateTree(currentRoot);
-  updatePath();
+
+  if (changed) {
+    updateTree(currentRoot);
+    updatePath();
+  }
 }
 
-//makes the given node the current root
+//if node is already the current root does nothing and returns false
+//otherwise makes the given node the current root and returns true
 function jumpToNode(node){
-  if (node == currentRoot) return;
+  if (node == currentRoot) return false;
   collapseSingleNode(currentRoot);
   if (node.childrenBackup) {
       node.children = node.childrenBackup;
   }
   currentRoot = node;
   currentRoot.children.forEach(collapseAllChildren);
+  return true;
 }
 
 //returns the correct height for the given node
@@ -520,4 +536,27 @@ function getLeftNodeTransform(node, i){
   xTranslate = width/2 - leftNodeWidth/2;
   leftNodeTranslateY += gapHeight + node.calculatedHeight;
   return "translate(" + xTranslate + "," + yTranslate + ")";
+}
+
+function enableScrolling(){
+  leftSVG.call(d3.drag()
+         .on("start", dragStarted)
+         .on("drag", dragged));
+}
+
+function disableScrolling(){
+  leftSVG.on(".drag", null);
+  leftSvgNodeGroup.attr("transform", "translate(0,0)");
+  leftSvgLinkGroup.attr("transform", "translate(0,0)");
+}
+
+function dragStarted(d){
+  previousY = d3.event.y;
+}
+
+function dragged(d){
+  translationY += d3.event.y - previousY;
+  previousY = d3.event.y;
+  leftSvgNodeGroup.attr("transform", "translate(0," + translationY + ")");
+  leftSvgLinkGroup.attr("transform", "translate(0," + translationY + ")");
 }
