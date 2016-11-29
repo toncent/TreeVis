@@ -5,7 +5,7 @@ var rightContainer = document.getElementById("rightContainer");
 var leftContainer = document.getElementById("leftContainer");
 var width, height;
 var treeWidth, treeHeight;
-var rightNodeHeight, rightNodeWidth, leftNodeWidth, leftNodeMaxHeight, leftNodeExpandedHeight, gapHeight;
+var rightNodeHeight, rightNodeWidth, leftNodeWidth, gapHeight;
 
 var previousK = 0;
 var animationDuration = 400, longPressDuration = 500;
@@ -19,16 +19,16 @@ var root, currentRoot;
 var tree;
 var expandedNode;
 var leftNodeTranslateY;
-//accumulated height to determine gaps between nodes
-var leftNodesAccumulatedHeight;
+
+var leftNodesAccumulatedHeight; //accumulated height to determine gaps between nodes
 
 var lineHeight = 1.3; //em
 var captionOffset = 2.3;//em
-var textBoxPadding = 10; //px
+var textBoxPadding = lineHeight*16; //px -- usually 1em is 16px
 var calculatingRightSide;
 
 var longPressTimeout;
-var dragStartY, translationY = 0;
+var dragStartY, translationY = 0, scrollingEnabled = false;
 
 //---------------------------------------//
 // Initialization
@@ -145,8 +145,8 @@ function calculateCoordinates(rootNode){
   rootNode.descendants().forEach(function(current){
     var x = current.x;
     var y = current.y;
-    current.x = Math.cos(x*2*Math.PI) * y * treeWidth + width / 2;
-    current.y = Math.sin(x*2*Math.PI) * y * treeHeight + height / 2;
+    current.x = Math.cos(x*2*Math.PI - Math.PI) * y * treeWidth + width / 2;
+    current.y = Math.sin(x*2*Math.PI - Math.PI) * y * treeHeight + height / 2;
   })
   rootNode.x = width / 2;
   rootNode.y = height / 2;
@@ -184,7 +184,7 @@ function getLine(link){
 //decides the color of a node depending on its position in the tree
 function getNodeColor(node){
   //the root gets white color
-  if (node.data.properties.id == currentRoot.data.properties.id) return "#fff";
+  //if (node.data.properties.id == currentRoot.data.properties.id) return "#fff";
   if (node.data.type == "diagnosis") return "#a0f";
   if (node.data.type == "symptom") return "#af0";
   if (node.data.type == "examination") return "#fa0";
@@ -313,15 +313,6 @@ function updatePath(){
   //create the path from the original root to the currently selected node
   var path = root.path(currentRoot);
   var links = [];
-  
-  //calculate the height of each node and the gap between nodes depending on 
-  //how many nodes need to be shown and whether there is an expanded node
-  leftNodeMaxHeight = height*0.75/path.length;
-  if (expandedNode) {
-    leftNodeExpandedHeight = expandedNode.left.necessaryHeight;
-    //reduce height of other nodes
-    leftNodeMaxHeight -= (leftNodeExpandedHeight - leftNodeMaxHeight)/(path.length - 1)
-  };
 
   //get all the nodes in the svg and compare them with the new path
   var nodes = leftSvgNodeGroup.selectAll("g").data(path, function(d){return d.data.properties.id});
@@ -331,11 +322,7 @@ function updatePath(){
   
   //recalculate how to wrap the text to fit inside it's container
   nodes.selectAll("text")
-        .text(function(d) {
-                if(d.data.properties.description) return d.data.properties.description
-                else return d.data.name
-              })
-        .each(fillWithText);
+       .each(fillWithText);
 
   //reset accumulated height
   leftNodesAccumulatedHeight = 0;
@@ -353,10 +340,6 @@ function updatePath(){
   //calculate text wrapping for all new nodes
   newNodes.insert("text")
           .attr("text-anchor","middle")
-          .text(function(d) {
-                if(d.data.properties.description) return d.data.properties.description
-                else return d.data.name
-              })
           .each(fillWithText);
   
   //insert a rectangle into each new group node
@@ -367,7 +350,7 @@ function updatePath(){
 
   
   //move nodes to the correct positions
-  gapHeight = (height - leftNodesAccumulatedHeight) / (path.length + 1);
+  gapHeight = height/20;
   leftNodeTranslateY = gapHeight;
   nodes.transition()
       .duration(animationDuration)
@@ -388,9 +371,9 @@ function updatePath(){
   newNodes.on("click", leftNodeClicked);
   
   //create an array of links containing source and target points with their x/y position and id of the connected node
-  var sourceY = 0, targetY;
+  var sourceY = 0;
   for (var i=0; i<path.length-1; i++){
-    sourceY += gapHeight + path[i].calculatedHeight;
+    sourceY += gapHeight + path[i].left.calculatedHeight;
     links[i] = {source:{id: path[i].data.properties.id, x: width/2, y: sourceY}, 
                 target:{id: path[i+1].data.properties.id, x: width/2, y: sourceY + gapHeight}};
   }
@@ -416,6 +399,17 @@ function updatePath(){
 
   //remove lines that aren't in the path anymore
   lines.exit().remove();
+
+  //enable scrolling if not all nodes fit on the screen
+  var bbox = leftSvgNodeGroup.node().getBBox();
+  var overFlow = bbox.y + bbox.height - height;
+  if (overFlow > 0 && !scrollingEnabled) {
+    enableScrolling();
+    scrollingEnabled = true;
+  } else if(scrollingEnabled){
+    disableScrolling();
+    scrollingEnabled = false;
+  }
 }
 
 function getOverviewLine(link){
@@ -432,8 +426,7 @@ function fillWithText(node){
       currentLine = [],
       y = textElement.attr("y"),
       topOffset = 0.5,
-      nodeWidth = calculatingRightSide ? rightNodeWidth : leftNodeWidth,
-      nodeHeight = calculatingRightSide ? rightNodeHeight : leftNodeMaxHeight;
+      nodeWidth = calculatingRightSide ? rightNodeWidth : leftNodeWidth;
 
   //remove all previous text
   textElement.text(null);
@@ -469,37 +462,22 @@ function fillWithText(node){
   //apply special treatment for left and right side nodes
   if (!calculatingRightSide){
     //save the height that is needed for all text to fit inside the rect
-    node.left.necessaryHeight = this.getBBox().height;
+    node.left.textHeight = this.getBBox().height;
   }
 
-  //text that is too long is shortened for all nodes on the right side and for all not-expanded nodes on the left side
-  if (this.getBBox().height > nodeHeight*0.95 && (!node.left.isExpanded || calculatingRightSide)) {
-    node.left.hasHiddenText = true;
+  //text that is too long is shortened for all nodes on the right side
+  if (calculatingRightSide && this.getBBox().height > rightNodeHeight) {
     var tspans = textElement.selectAll("tspan");
-    while(this.getBBox().height > nodeHeight*0.95){
+    while(this.getBBox().height > rightNodeHeight){
       tspans.filter(":last-child").remove();
     }
     //change the last line to "..." to show that there is hidden text
     tspans.filter(":last-child").text("...");
-  } else {
-    node.left.hasHiddenText = false;
   }
 }
 
 function leftNodeClicked(node){
-  var changed = false;
-  //expand the clicked node if it has hidden text
-  if (!node.left.isExpanded && node.left.hasHiddenText) {
-    changed = true;
-    node.left.isExpanded = true;
-    //if another node is currently expanded shrink it again
-    if(expandedNode) expandedNode.left.isExpanded = false;
-    //set the clicked node to be the currently expanded one
-    expandedNode = node;
-  } else {
-    changed = jumpToNode(node);
-  }
-
+  var changed = jumpToNode(node);
   if (changed) {
     updateTree(currentRoot);
     updatePath();
@@ -521,22 +499,24 @@ function jumpToNode(node){
 
 //returns the correct height for the given node
 function getLeftNodeHeight(node){
-  var result = node.left.isExpanded ? leftNodeExpandedHeight : leftNodeMaxHeight;
-  result = result > node.left.necessaryHeight ? node.left.necessaryHeight : result;
-  node.calculatedHeight = result;
-
+  var result = node.left.textHeight + textBoxPadding;
+  node.left.calculatedHeight = result;
   //increase accumulated height by the height of this node
   leftNodesAccumulatedHeight += result;
-  return result + lineHeight*16;
+  return result;
 }
 
 function getLeftNodeTransform(node, i){
   var xTranslate, yTranslate;
   yTranslate = leftNodeTranslateY;
   xTranslate = width/2 - leftNodeWidth/2;
-  leftNodeTranslateY += gapHeight + node.calculatedHeight;
+  leftNodeTranslateY += gapHeight + this.getBBox().height;
   return "translate(" + xTranslate + "," + yTranslate + ")";
 }
+
+//############################
+// Scrolling behaviour
+//############################
 
 function enableScrolling(){
   leftSVG.call(d3.drag()
@@ -546,8 +526,8 @@ function enableScrolling(){
 
 function disableScrolling(){
   leftSVG.on(".drag", null);
-  leftSvgNodeGroup.attr("transform", "translate(0,0)");
-  leftSvgLinkGroup.attr("transform", "translate(0,0)");
+  leftSvgNodeGroup.transition().duration(animationDuration).attr("transform", "translate(0,0)");
+  leftSvgLinkGroup.transition().duration(animationDuration).attr("transform", "translate(0,0)");
 }
 
 function dragStarted(d){
