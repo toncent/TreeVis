@@ -17,10 +17,6 @@ var rightSvgNodeGroup;
 
 var root, currentRoot;
 var tree;
-var expandedNode;
-var leftNodeTranslateY;
-
-var leftNodesAccumulatedHeight; //accumulated height to determine gaps between nodes
 
 var lineHeight = 1.3; //em
 var captionOffset = 2.3;//em
@@ -28,7 +24,7 @@ var textBoxPadding = lineHeight*16; //px -- usually 1em is 16px
 var calculatingRightSide;
 
 var longPressTimeout;
-var dragStartY, translationY = 0, scrollingEnabled = false;
+var dragStartY, translationY = 0, minTranslationY, scrollingEnabled = false;
 
 //---------------------------------------//
 // Initialization
@@ -324,15 +320,12 @@ function updatePath(){
   nodes.selectAll("text")
        .each(fillWithText);
 
-  //reset accumulated height
-  leftNodesAccumulatedHeight = 0;
   //update width and height of already existing nodes
   leftSvgNodeGroup.selectAll("rect")
         .transition()
         .duration(animationDuration)
         .attr("width", leftNodeWidth)
-        .attr("height", getLeftNodeHeight)
-        .attr("fill", getNodeColor);
+        .attr("height", getLeftNodeHeight);
   
   //for every node that is new to the svg append a group element
   var newNodes = nodes.enter().append("g");
@@ -401,15 +394,26 @@ function updatePath(){
   lines.exit().remove();
 
   //enable scrolling if not all nodes fit on the screen
-  var bbox = leftSvgNodeGroup.node().getBBox();
-  var overFlow = bbox.y + bbox.height - height;
-  if (overFlow > 0 && !scrollingEnabled) {
-    enableScrolling();
-    scrollingEnabled = true;
+  var topOffset = gapHeight;
+  var leftContainerHeight = calculateLeftContainerHeight(path);
+  if (leftContainerHeight + topOffset > height / 2) {
+    minTranslationY = height / 2 - (topOffset + leftContainerHeight);
+    if (!scrollingEnabled) {
+      enableScrolling();
+      scrollingEnabled = true;
+    }
   } else if(scrollingEnabled){
     disableScrolling();
     scrollingEnabled = false;
   }
+}
+
+function calculateLeftContainerHeight(path){
+  var result = 0;
+  for (var i = 0; i < path.length; i++) {
+    result += path[i].left.calculatedHeight + gapHeight;
+  };
+  return result;
 }
 
 function getOverviewLine(link){
@@ -500,9 +504,9 @@ function jumpToNode(node){
 //returns the correct height for the given node
 function getLeftNodeHeight(node){
   var result = node.left.textHeight + textBoxPadding;
+  // using node.calculatedHeight instead of getting the bounding box
+  // because bounding box can return wrong size during animations
   node.left.calculatedHeight = result;
-  //increase accumulated height by the height of this node
-  leftNodesAccumulatedHeight += result;
   return result;
 }
 
@@ -510,7 +514,7 @@ function getLeftNodeTransform(node, i){
   var xTranslate, yTranslate;
   yTranslate = leftNodeTranslateY;
   xTranslate = width/2 - leftNodeWidth/2;
-  leftNodeTranslateY += gapHeight + this.getBBox().height;
+  leftNodeTranslateY += gapHeight + node.left.calculatedHeight;
   return "translate(" + xTranslate + "," + yTranslate + ")";
 }
 
@@ -536,6 +540,10 @@ function dragStarted(d){
 
 function dragged(d){
   translationY += d3.event.y - previousY;
+  
+  if (translationY < minTranslationY) translationY = minTranslationY;
+  else if (translationY > 0) translationY = 0;
+
   previousY = d3.event.y;
   leftSvgNodeGroup.attr("transform", "translate(0," + translationY + ")");
   leftSvgLinkGroup.attr("transform", "translate(0," + translationY + ")");
