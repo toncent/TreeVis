@@ -305,6 +305,7 @@ function updateTree(rootNode){
 }
 
 function updatePath(){
+  if (leftContainer.offsetWidth == 0) return;
   calculatingRightSide = false;
   //create the path from the original root to the currently selected node
   var path = root.path(currentRoot);//.reverse();
@@ -412,6 +413,7 @@ function updatePath(){
       scrollingEnabled = true;
     }
   } else if(scrollingEnabled){
+    scrollToTop();
     disableScrolling();
     scrollingEnabled = false;
   }
@@ -539,8 +541,6 @@ function enableScrolling(){
 
 function disableScrolling(){
   leftSVG.on(".drag", null);
-  translationY = 0;
-  executeScrolling(true);
 }
 
 function dragStarted(d){
@@ -559,6 +559,11 @@ function dragged(d){
 
 function scrollToNewestNode(){
   translationY = minTranslationY;
+  executeScrolling(true);
+}
+
+function scrollToTop(){
+  translationY = 0;
   executeScrolling(true);
 }
 
