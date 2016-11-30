@@ -307,7 +307,7 @@ function updateTree(rootNode){
 function updatePath(){
   calculatingRightSide = false;
   //create the path from the original root to the currently selected node
-  var path = root.path(currentRoot);
+  var path = root.path(currentRoot).reverse();
   var links = [];
 
   //get all the nodes in the svg and compare them with the new path
@@ -345,11 +345,12 @@ function updatePath(){
   //move nodes to the correct positions
   gapHeight = height/20;
   leftNodeTranslateY = gapHeight;
+
+  newNodes.attr("transform", getLeftNodeTransform);
+
   nodes.transition()
       .duration(animationDuration)
       .attr("transform", getLeftNodeTransform);
-  
-  newNodes.attr("transform", getLeftNodeTransform);
   
   //hide new nodes to fade them in later
   newNodes.attr("opacity", 0);
