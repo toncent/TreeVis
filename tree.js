@@ -307,13 +307,14 @@ function updateTree(rootNode){
 function updatePath(){
   calculatingRightSide = false;
   //create the path from the original root to the currently selected node
-  var path = root.path(currentRoot).reverse();
+  var path = root.path(currentRoot);//.reverse();
   var links = [];
 
   //get all the nodes in the svg and compare them with the new path
   var nodes = leftSvgNodeGroup.selectAll("g").data(path, function(d){return d.data.properties.id});
   
   //remove nodes that aren't in the path anymore
+  var nodesRemoved = !nodes.exit().empty();
   nodes.exit().remove();
   
   //recalculate how to wrap the text to fit inside it's container
@@ -329,7 +330,7 @@ function updatePath(){
   
   //for every node that is new to the svg append a group element
   var newNodes = nodes.enter().append("g");
-  
+
   //calculate text wrapping for all new nodes
   newNodes.insert("text")
           .attr("text-anchor","middle")
@@ -346,11 +347,15 @@ function updatePath(){
   gapHeight = height/20;
   leftNodeTranslateY = gapHeight;
 
-  newNodes.attr("transform", getLeftNodeTransform);
+  //new node is added at the top
+  //newNodes.attr("transform", getLeftNodeTransform);
 
   nodes.transition()
       .duration(animationDuration)
       .attr("transform", getLeftNodeTransform);
+
+  //new node is added at the bottom
+  newNodes.attr("transform", getLeftNodeTransform);
   
   //hide new nodes to fade them in later
   newNodes.attr("opacity", 0);
@@ -395,10 +400,13 @@ function updatePath(){
   lines.exit().remove();
 
   //enable scrolling if not all nodes fit on the screen
-  var topOffset = gapHeight;
   var leftContainerHeight = calculateLeftContainerHeight(path);
-  if (leftContainerHeight + topOffset > height / 2) {
-    minTranslationY = height / 2 - (topOffset + leftContainerHeight);
+  if (leftContainerHeight > height / 2) {
+    minTranslationY = height / 2 - (leftContainerHeight);
+    
+    //if a new node has been added scroll it to the center of the screen
+    if (!newNodes.empty() || nodesRemoved) scrollToNewestNode();
+    
     if (!scrollingEnabled) {
       enableScrolling();
       scrollingEnabled = true;
@@ -531,8 +539,8 @@ function enableScrolling(){
 
 function disableScrolling(){
   leftSVG.on(".drag", null);
-  leftSvgNodeGroup.transition().duration(animationDuration).attr("transform", "translate(0,0)");
-  leftSvgLinkGroup.transition().duration(animationDuration).attr("transform", "translate(0,0)");
+  translationY = 0;
+  executeScrolling(true);
 }
 
 function dragStarted(d){
@@ -544,8 +552,22 @@ function dragged(d){
   
   if (translationY < minTranslationY) translationY = minTranslationY;
   else if (translationY > 0) translationY = 0;
-
   previousY = d3.event.y;
-  leftSvgNodeGroup.attr("transform", "translate(0," + translationY + ")");
-  leftSvgLinkGroup.attr("transform", "translate(0," + translationY + ")");
+
+  executeScrolling(false);
+}
+
+function scrollToNewestNode(){
+  translationY = minTranslationY;
+  executeScrolling(true);
+}
+
+function executeScrolling(shouldAnimate){
+  if (shouldAnimate) {
+    leftSvgNodeGroup.transition().duration(animationDuration).attr("transform", "translate(0," + translationY + ")");
+    leftSvgLinkGroup.transition().duration(animationDuration).attr("transform", "translate(0," + translationY + ")");
+  } else {
+    leftSvgNodeGroup.attr("transform", "translate(0," + translationY + ")");
+    leftSvgLinkGroup.attr("transform", "translate(0," + translationY + ")");
+  }
 }
