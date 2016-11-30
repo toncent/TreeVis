@@ -1,6 +1,6 @@
-//---------------------------------------//
+//############################
 // Variables
-//---------------------------------------//
+//############################
 var rightContainer = document.getElementById("rightContainer");
 var leftContainer = document.getElementById("leftContainer");
 var width, height;
@@ -26,14 +26,14 @@ var calculatingRightSide;
 var longPressTimeout;
 var dragStartY, translationY = 0, minTranslationY, scrollingEnabled = false;
 
-//---------------------------------------//
+//############################
 // Initialization
-//---------------------------------------//
+//############################
 fetchDataAndInitialize();
 
-//---------------------------------------//
+//############################
 // Functions
-//---------------------------------------//
+//############################
 function fetchDataAndInitialize(){
   //load example tree data from json file
   d3.json("http://10.200.1.75:8012/tree?hops=15&name=graphdiarrhea1").get(null, handleJsonResponse);
@@ -56,9 +56,6 @@ function handleJsonResponse(arr){
 function setupD3Hierarchy(arr){
   // create a d3 hierarchy from the data collected from exampleTree.json
   root = d3.hierarchy(arr[0])
-    //.id(function(d) { return d.properties.id; }) //tells d3 where to find the id for each node
-    //.parentId(function(d) { return d.properties.parent; }); //tells d3 where to find the id for each nodes parent node
-    //(arr); //passes the data to create the tree from
   
   currentRoot = root;
   currentRoot.x0 = width/2;
@@ -119,49 +116,6 @@ function init(){
   updatePath();
 }
 
-function nodeClicked(node){
-  //if the current root is clicked then hide it's children and make it's parent 
-  //the root unless the clicked node is the root of the whole tree with hidden children.
-  if (node == currentRoot && (node.children || node.parent)) {
-    collapseSingleNode(node);
-    if(node.parent) currentRoot = node.parent;
-  } else {
-    //make the clicked node the new root and show its children
-    currentRoot = node;
-    if (node.childrenBackup) {
-      node.children = node.childrenBackup;
-    }
-  }
-  updateTree(currentRoot);
-  updatePath();
-}
-
-//calculates where to put each node using the layout d3 came up with as polar coordinates
-function calculateCoordinates(rootNode){
-  rootNode.descendants().forEach(function(current){
-    var x = current.x;
-    var y = current.y;
-    current.x = Math.cos(x*2*Math.PI - Math.PI) * y * treeWidth + width / 2;
-    current.y = Math.sin(x*2*Math.PI - Math.PI) * y * treeHeight + height / 2;
-  })
-  rootNode.x = width / 2;
-  rootNode.y = height / 2;
-}
-
-function collapseSingleNode(node){
-  if (node.children) {
-    node.childrenBackup = node.children;
-    node.children = null;
-  }
-}
-
-function collapseAllChildren(node){
-  if (node.children) {
-    node.children.forEach(collapseAllChildren);
-    collapseSingleNode(node);
-  }
-}
-
 function calculateTextSize(d){
   d.fontSize = (rightNodeWidth / this.getComputedTextLength())*0.9;
 }
@@ -186,6 +140,121 @@ function getNodeColor(node){
   if (node.data.type == "examination") return "#fa0";
   if (node.data.type == "therapy") return "#0af";
   return "#a0f";
+}
+
+//inserts line breaks into the text so it fits inside the corresponding rectangle
+function fillWithText(node){
+  var textElement = d3.select(this),
+      text = node.data.properties.description,
+      lineNumber = 1,
+      wordList = text.split(/\s+/).reverse(),
+      currentWord,
+      currentLine = [],
+      y = textElement.attr("y"),
+      topOffset = 0.5,
+      nodeWidth = calculatingRightSide ? rightNodeWidth : leftNodeWidth;
+
+  //remove all previous text
+  textElement.text(null);
+  
+  //add the caption to the text element
+  textElement.append("tspan")
+             .attr("x", nodeWidth/2)
+             .attr("y", 0)
+             .attr("dy", lineHeight + "em")
+             .attr("font-size", "1em")
+             .text(node.data.name)
+             .attr("font-style", "italic")
+             .each(calculateTextSize)
+             .attr("font-size", function(d) {return Math.min(1.3, d.fontSize) + "em"});
+
+  //add tspans for each line and fill them word-by-word until no more words can fit into that line
+  var currentTspan = textElement.append("tspan")
+                                .attr("x", nodeWidth/2)
+                                .attr("y", 0)
+                                .attr("dy",  (captionOffset + lineHeight) + "em");
+  while (currentWord = wordList.pop()){
+    currentLine.push(currentWord);
+    currentTspan.text(currentLine.join(" "));
+    if (currentTspan.node().getComputedTextLength() > nodeWidth*0.95) {
+        currentLine.pop();
+        currentTspan.text(currentLine.join(" "));
+        currentLine = [currentWord];
+        currentTspan = textElement.append("tspan").attr("x", nodeWidth/2).attr("y", 0).attr("dy", (++lineNumber*lineHeight + captionOffset) + "em");
+        currentTspan.text(currentLine.join(" "));
+    }
+  }
+  
+  //apply special treatment for left and right side nodes
+  if (!calculatingRightSide){
+    //save the height that is needed for all text to fit inside the rect
+    node.left.textHeight = this.getBBox().height;
+  }
+
+  //text that is too long is shortened for all nodes on the right side
+  if (calculatingRightSide && this.getBBox().height > rightNodeHeight) {
+    var tspans = textElement.selectAll("tspan");
+    while(this.getBBox().height > rightNodeHeight){
+      tspans.filter(":last-child").remove();
+    }
+    //change the last line to "..." to show that there is hidden text
+    tspans.filter(":last-child").text("...");
+  }
+}
+
+//if node is already the current root does nothing and returns false
+//otherwise makes the given node the current root and returns true
+function jumpToNode(node){
+  if (node == currentRoot) return false;
+  collapseSingleNode(currentRoot);
+  if (node.childrenBackup) {
+      node.children = node.childrenBackup;
+  }
+  currentRoot = node;
+  currentRoot.children.forEach(collapseAllChildren);
+  return true;
+}
+
+//############################
+// Right SVG (main tree)
+//############################
+
+function updateTree(rootNode){
+  calculatingRightSide = true;
+  //calculate a new layout for the tree
+  tree(rootNode);
+  //convert coordinates of all nodes for radial layout
+  calculateCoordinates(rootNode);
+
+  // add all the nodes from the tree as circles to the svg node Group
+  var nodes = rightSvgNodeGroup.selectAll("g").data(rootNode.descendants(), function(d){return d.data.properties.id});
+  updateRightSvgNodes(nodes);
+
+  //get all the nodes that have been added to the tree
+  var newNodes = nodes.enter().append("g");
+  createNewRightSvgNodes(newNodes);
+  
+  //remove nodes that aren't supposed to be shown anymore
+  nodes.exit().remove();
+
+  // add all the links from the tree to the svg link group
+  var links = rightSvgLinkGroup.selectAll("path").data(rootNode.links(), function(d){return d.target.data.properties.id});
+  updateRightSvgLinks(links);
+  var newLinks = links.enter().append("path");
+  createNewRightSvgLinks(newLinks);
+  //remove links that don't have a target anymore
+  links.exit().remove();
+
+  //backup the current positions for animations
+  nodes.each(function(d){
+    d.x0 = d.x;
+    d.y0 = d.y;
+  });
+
+  newNodes.each(function(d){
+    d.x0 = d.x;
+    d.y0 = d.y;
+  });
 }
 
 //updates previously existing nodes to their new status
@@ -266,43 +335,52 @@ function createNewRightSvgLinks(newLinks){
             .attr("d", getLine);
 }
 
-function updateTree(rootNode){
-  calculatingRightSide = true;
-  //calculate a new layout for the tree
-  tree(rootNode);
-  //convert coordinates of all nodes for radial layout
-  calculateCoordinates(rootNode);
-
-  // add all the nodes from the tree as circles to the svg node Group
-  var nodes = rightSvgNodeGroup.selectAll("g").data(rootNode.descendants(), function(d){return d.data.properties.id});
-  updateRightSvgNodes(nodes);
-
-  //get all the nodes that have been added to the tree
-  var newNodes = nodes.enter().append("g");
-  createNewRightSvgNodes(newNodes);
-  
-  //remove nodes that aren't supposed to be shown anymore
-  nodes.exit().remove();
-
-  // add all the links from the tree to the svg link group
-  var links = rightSvgLinkGroup.selectAll("path").data(rootNode.links(), function(d){return d.target.data.properties.id});
-  updateRightSvgLinks(links);
-  var newLinks = links.enter().append("path");
-  createNewRightSvgLinks(newLinks);
-  //remove links that don't have a target anymore
-  links.exit().remove();
-
-  //backup the current positions for animations
-  nodes.each(function(d){
-    d.x0 = d.x;
-    d.y0 = d.y;
-  });
-
-  newNodes.each(function(d){
-    d.x0 = d.x;
-    d.y0 = d.y;
-  });
+function nodeClicked(node){
+  //if the current root is clicked then hide it's children and make it's parent 
+  //the root unless the clicked node is the root of the whole tree with hidden children.
+  if (node == currentRoot && (node.children || node.parent)) {
+    collapseSingleNode(node);
+    if(node.parent) currentRoot = node.parent;
+  } else {
+    //make the clicked node the new root and show its children
+    currentRoot = node;
+    if (node.childrenBackup) {
+      node.children = node.childrenBackup;
+    }
+  }
+  updateTree(currentRoot);
+  updatePath();
 }
+
+//calculates where to put each node using the layout d3 came up with as polar coordinates
+function calculateCoordinates(rootNode){
+  rootNode.descendants().forEach(function(current){
+    var x = current.x;
+    var y = current.y;
+    current.x = Math.cos(x*2*Math.PI - Math.PI) * y * treeWidth + width / 2;
+    current.y = Math.sin(x*2*Math.PI - Math.PI) * y * treeHeight + height / 2;
+  })
+  rootNode.x = width / 2;
+  rootNode.y = height / 2;
+}
+
+function collapseSingleNode(node){
+  if (node.children) {
+    node.childrenBackup = node.children;
+    node.children = null;
+  }
+}
+
+function collapseAllChildren(node){
+  if (node.children) {
+    node.children.forEach(collapseAllChildren);
+    collapseSingleNode(node);
+  }
+}
+
+//############################
+// Left SVG (overview)
+//############################
 
 function updatePath(){
   if (leftContainer.offsetWidth == 0) return;
@@ -404,9 +482,11 @@ function updatePath(){
   var leftContainerHeight = calculateLeftContainerHeight(path);
   if (leftContainerHeight > height / 2) {
     minTranslationY = height / 2 - (leftContainerHeight);
-    
-    //if a new node has been added scroll it to the center of the screen
-    if (!newNodes.empty() || nodesRemoved) scrollToNewestNode();
+
+    //check if nodes need to be scrolled
+    //due to screen resizing (orientation change on mobile devices),
+    //a new node being added or nodes being removed
+    if (!newNodes.empty() || nodesRemoved || minTranslationY > translationY) scrollToNewestNode();
     
     if (!scrollingEnabled) {
       enableScrolling();
@@ -427,89 +507,12 @@ function calculateLeftContainerHeight(path){
   return result;
 }
 
-function getOverviewLine(link){
-  return lineGenerator([[link.source.x + leftNodeWidth / 2, link.source.y + leftNodeMaxHeight], [link.target.x + leftNodeWidth / 2, link.target.y]]);
-}
-
-//inserts line breaks into the text so it fits inside the corresponding rectangle
-function fillWithText(node){
-  var textElement = d3.select(this),
-      text = node.data.properties.description,
-      lineNumber = 1,
-      wordList = text.split(/\s+/).reverse(),
-      currentWord,
-      currentLine = [],
-      y = textElement.attr("y"),
-      topOffset = 0.5,
-      nodeWidth = calculatingRightSide ? rightNodeWidth : leftNodeWidth;
-
-  //remove all previous text
-  textElement.text(null);
-  
-  //add the caption to the text element
-  textElement.append("tspan")
-             .attr("x", nodeWidth/2)
-             .attr("y", 0)
-             .attr("dy", lineHeight + "em")
-             .attr("font-size", "1em")
-             .text(node.data.name)
-             .attr("font-style", "italic")
-             .each(calculateTextSize)
-             .attr("font-size", function(d) {return Math.min(1.3, d.fontSize) + "em"});
-
-  //add tspans for each line and fill them word-by-word until no more words can fit into that line
-  var currentTspan = textElement.append("tspan")
-                                .attr("x", nodeWidth/2)
-                                .attr("y", 0)
-                                .attr("dy",  (captionOffset + lineHeight) + "em");
-  while (currentWord = wordList.pop()){
-    currentLine.push(currentWord);
-    currentTspan.text(currentLine.join(" "));
-    if (currentTspan.node().getComputedTextLength() > nodeWidth*0.95) {
-        currentLine.pop();
-        currentTspan.text(currentLine.join(" "));
-        currentLine = [currentWord];
-        currentTspan = textElement.append("tspan").attr("x", nodeWidth/2).attr("y", 0).attr("dy", (++lineNumber*lineHeight + captionOffset) + "em");
-        currentTspan.text(currentLine.join(" "));
-    }
-  }
-  
-  //apply special treatment for left and right side nodes
-  if (!calculatingRightSide){
-    //save the height that is needed for all text to fit inside the rect
-    node.left.textHeight = this.getBBox().height;
-  }
-
-  //text that is too long is shortened for all nodes on the right side
-  if (calculatingRightSide && this.getBBox().height > rightNodeHeight) {
-    var tspans = textElement.selectAll("tspan");
-    while(this.getBBox().height > rightNodeHeight){
-      tspans.filter(":last-child").remove();
-    }
-    //change the last line to "..." to show that there is hidden text
-    tspans.filter(":last-child").text("...");
-  }
-}
-
 function leftNodeClicked(node){
   var changed = jumpToNode(node);
   if (changed) {
     updateTree(currentRoot);
     updatePath();
   }
-}
-
-//if node is already the current root does nothing and returns false
-//otherwise makes the given node the current root and returns true
-function jumpToNode(node){
-  if (node == currentRoot) return false;
-  collapseSingleNode(currentRoot);
-  if (node.childrenBackup) {
-      node.children = node.childrenBackup;
-  }
-  currentRoot = node;
-  currentRoot.children.forEach(collapseAllChildren);
-  return true;
 }
 
 //returns the correct height for the given node
@@ -576,3 +579,7 @@ function executeScrolling(shouldAnimate){
     leftSvgLinkGroup.attr("transform", "translate(0," + translationY + ")");
   }
 }
+
+//############################
+// Popup Menu
+//############################
