@@ -32,6 +32,14 @@ path {
   fill : none;
 }
 
+path.nay {
+  fill: rgba(255,0,0,0.5);
+}
+
+path.yay {
+  fill: rgba(0,255,0,0.5);
+}
+
 text {
   stroke : #000;
   fill : #000;

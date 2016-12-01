@@ -26,6 +26,10 @@ var calculatingRightSide;
 var longPressTimeout;
 var dragStartY, translationY = 0, minTranslationY, scrollingEnabled = false;
 
+var longPressHappened = false;
+
+var popUpMenu, popUpMenuRadius, arcGenerator, donutChart, menuNode, mouseCoords;
+
 //############################
 // Initialization
 //############################
@@ -92,6 +96,9 @@ function initHtmlElements(){
 
   leftSvgLinkGroup = leftSVG.append("g");
   leftSvgNodeGroup = leftSVG.append("g");
+
+  rightSVG.on("mouseup", onMouseUp);
+  //rightSVG.on("mouseout", onMouseUp);
 }
 
 function init(){
@@ -109,6 +116,8 @@ function init(){
   rightNodeHeight = height*0.25;
   treeWidth = width/2 - rightNodeWidth*0.55;
   treeHeight = height/2 - rightNodeHeight*0.55;
+
+  initPopUpMenu();
   updateTree(currentRoot);
 
   //left half initialization
@@ -282,7 +291,6 @@ function updateRightSvgNodes(nodes){
 function createNewRightSvgNodes(newNodes){
   //nodes get text applied to them
   newNodes.insert("text")
-          .text(function(d) {return d.data.name})
           .attr("text-anchor","middle")
           .each(fillWithText);
   
@@ -311,12 +319,14 @@ function createNewRightSvgNodes(newNodes){
             )
             .attr("opacity", 1)
             //add the click listener after the animation has ended
-            .on("end", addClickListener);
+            .on("end", addMouseListeners);
 }
 
-function addClickListener(node){
+function addMouseListeners(node){
   //give all new nodes a click listener
-  d3.select(this).on("click", nodeClicked);
+  element = d3.select(this);
+  element.on("click", nodeClicked);
+  element.on("mousedown", startLongPressTimer);
 }
 
 function updateRightSvgLinks(links){
@@ -336,6 +346,10 @@ function createNewRightSvgLinks(newLinks){
 }
 
 function nodeClicked(node){
+  if (longPressHappened) {
+    longPressHappened = false;
+    return;
+  }
   //if the current root is clicked then hide it's children and make it's parent 
   //the root unless the clicked node is the root of the whole tree with hidden children.
   if (node == currentRoot && (node.children || node.parent)) {
@@ -583,3 +597,85 @@ function executeScrolling(shouldAnimate){
 //############################
 // Popup Menu
 //############################
+
+function startLongPressTimer(node){
+  mouseCoords = d3.mouse(rightSVG.node());
+  longPressTimeout = window.setTimeout(onLongPress, 500, node);
+}
+
+function onMouseUp(){
+  window.clearTimeout(longPressTimeout);
+  if (menuNode) {
+    closePopUpMenu();
+  }
+}
+
+function onLongPress(node){
+  console.log("long press");
+  longPressHappened = true;
+  openPopUpMenu(mouseCoords[0], mouseCoords[1]);
+  menuNode = node;
+}
+
+//generates a new popUpMenu using d3.arc and d3.pie
+function initPopUpMenu(){
+  popUpMenuRadius = Math.max(rightNodeHeight, rightNodeWidth) / 2;
+  arcGenerator = d3.arc().innerRadius(popUpMenuRadius * 0.4).outerRadius(popUpMenuRadius).padAngle(0.1);
+  //calculate the angles for a pie/donut chart with two equal sections
+  donutChart = d3.pie()
+                 .value(function(d){return d.value})
+                 ([{value:1, cssClass:"yay"},{value:1, color:"rgba(0,255,0,100);", cssClass:"nay"}]);
+}
+
+function openPopUpMenu(x,y){
+  //create a group element to contain the menu without appending it to the DOM
+  popUpMenu = rightSVG.append("g");
+
+  //put the menu at the correct opening position
+  popUpMenu.attr("transform", "translate(" + x + "," + y + ")");
+
+  //add a path for each section of the donut chart to the popUpMenu and animate it
+  var smallArcGenerator = d3.arc().innerRadius(popUpMenuRadius * 0.3).outerRadius(popUpMenuRadius * 0.5).padAngle(0.1);
+  popUpMenu.selectAll("path")
+           .data(donutChart)
+           .enter()
+           .append("path")
+           .attr("class", function(d){return d.data.cssClass})
+           .attr("d", smallArcGenerator)
+           .each(addPopUpMenuListeners)
+           .transition()
+              .attr("d", arcGenerator)
+              .ease(d3.easeElastic)
+              .duration(animationDuration);
+}
+
+function closePopUpMenu(){
+  popUpMenu.remove();
+}
+
+function addPopUpMenuListeners(){
+  d3.select(this).on("mouseover", onPopUpMenuMouseOver)
+                    .on("mouseout", onPopUpMenuMouseOut)
+                    .on("mouseup", onPopUpMenuMouseUp);
+}
+
+function onPopUpMenuMouseOver(){
+  d3.select(this).transition().attr("d", d3.arc().outerRadius(popUpMenuRadius * 1.2).innerRadius(popUpMenuRadius * 0.4).padAngle(0.1)).duration(animationDuration);
+}
+
+function onPopUpMenuMouseOut(element){
+  d3.select(this).transition().attr("d", arcGenerator).duration(animationDuration).ease(d3.easeBounce);
+}
+
+function onPopUpMenuMouseUp(element){
+  console.log("up "+element.data.cssClass);
+}
+/*
+b = d3.arc().outerRadius(200).innerRadius(160);
+g = leftSVG.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+a = d3.pie()([1,1,1])
+g.selectAll("path").data(a).enter().append("path").attr("d",b);
+p = g.select("path")
+p.attr("r",20)
+p.transition().attr("d", d3.arc().innerRadius(10).outerRadius(300)).duration(500)
+*/
