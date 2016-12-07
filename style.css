@@ -28,6 +28,22 @@ rect {
   stroke: #000;
 }
 
+.diagnosis {
+  fill : rgb(255,255,100);
+}
+
+.symptom {
+  fill : rgb(255,100,255);
+}
+
+.examination {
+  fill : rgb(255,100,100);
+}
+
+.therapy {
+  fill : rgb(100,255,255);
+}
+
 path {
   fill : none;
 }

@@ -141,14 +141,8 @@ function getLine(link){
 }
 
 //decides the color of a node depending on its position in the tree
-function getNodeColor(node){
-  //the root gets white color
-  //if (node.data.properties.id == currentRoot.data.properties.id) return "#fff";
-  if (node.data.type == "diagnosis") return "#a0f";
-  if (node.data.type == "symptom") return "#af0";
-  if (node.data.type == "examination") return "#fa0";
-  if (node.data.type == "therapy") return "#0af";
-  return "#a0f";
+function getNodeClass(node){
+  return node.data.type;
 }
 
 //inserts line breaks into the text so it fits inside the corresponding rectangle
@@ -274,7 +268,7 @@ function updateRightSvgNodes(nodes){
       .attr("transform", function(d){
         return "translate(" + (d.x - rightNodeWidth/2) + "," + (d.y - rightNodeHeight/2) + ")"}
       )
-      .attr("fill", getNodeColor);
+      .attr("class", getNodeClass);
 
   //update the sizes of nodes in case the screen size has changed
   nodes.selectAll("rect")
@@ -308,7 +302,7 @@ function createNewRightSvgNodes(newNodes){
               }
               else return "translate(" + (d.x - rightNodeWidth/2) + "," + (d.y - rightNodeHeight/2) + ")";
             })
-          .attr("fill", getNodeColor)
+          .attr("class", getNodeClass)
           //animate the node to fade in and go to it's correct position (starting from the parents previous position)
           .attr("opacity", 0)
           .transition()
@@ -327,6 +321,7 @@ function addMouseListeners(node){
   element = d3.select(this);
   element.on("click", nodeClicked);
   element.on("mousedown", startLongPressTimer);
+  element.on("touchstart", startLongPressTimer);
 }
 
 function updateRightSvgLinks(links){
@@ -401,7 +396,6 @@ function updatePath(){
   calculatingRightSide = false;
   //create the path from the original root to the currently selected node
   var path = root.path(currentRoot);//.reverse();
-  var links = [];
 
   //get all the nodes in the svg and compare them with the new path
   var nodes = leftSvgNodeGroup.selectAll("g").data(path, function(d){return d.data.properties.id});
@@ -410,6 +404,33 @@ function updatePath(){
   var nodesRemoved = !nodes.exit().empty();
   nodes.exit().remove();
   
+  updateLeftSVGNodes(nodes);
+  
+  //for every node that is new to the svg append a group element
+  var newNodes = nodes.enter().append("g");
+
+  createNewLeftSVGNodes(newNodes);
+
+  //move nodes to the correct positions
+  gapHeight = height/20;
+  leftNodeTranslateY = gapHeight;
+
+  //new node is added at the top
+  //newNodes.attr("transform", getLeftNodeTransform);
+
+  animateLeftSVGNodes(nodes, newNodes);
+
+  //give all new nodes a click listener
+  newNodes.on("click", leftNodeClicked);
+  
+  //update the lines between nodes 
+  updateLeftSVGLinks(path);
+
+  //enable scrolling if not enough nodes fit on the screen
+  toggleScrolling(path, newNodes, nodesRemoved);
+}
+
+function updateLeftSVGNodes(nodes){
   //recalculate how to wrap the text to fit inside it's container
   nodes.selectAll("text")
        .each(fillWithText);
@@ -420,10 +441,9 @@ function updatePath(){
         .duration(animationDuration)
         .attr("width", leftNodeWidth)
         .attr("height", getLeftNodeHeight);
-  
-  //for every node that is new to the svg append a group element
-  var newNodes = nodes.enter().append("g");
+}
 
+function createNewLeftSVGNodes(newNodes){
   //calculate text wrapping for all new nodes
   newNodes.insert("text")
           .attr("text-anchor","middle")
@@ -433,16 +453,10 @@ function updatePath(){
   newNodes.insert("rect", "text")
           .attr("width", leftNodeWidth)
           .attr("height", getLeftNodeHeight)
-          .attr("fill", getNodeColor);
+          .attr("class", getNodeClass);
+}
 
-  
-  //move nodes to the correct positions
-  gapHeight = height/20;
-  leftNodeTranslateY = gapHeight;
-
-  //new node is added at the top
-  //newNodes.attr("transform", getLeftNodeTransform);
-
+function animateLeftSVGNodes(nodes, newNodes){
   nodes.transition()
       .duration(animationDuration)
       .attr("transform", getLeftNodeTransform);
@@ -458,11 +472,11 @@ function updatePath(){
           .duration(animationDuration)
           .delay(animationDuration)
           .attr("opacity", 1);
+}
 
-  //give all new nodes a click listener
-  newNodes.on("click", leftNodeClicked);
-  
+function updateLeftSVGLinks(path){
   //create an array of links containing source and target points with their x/y position and id of the connected node
+  var links = [];
   var sourceY = 0;
   for (var i=0; i<path.length-1; i++){
     sourceY += gapHeight + path[i].left.calculatedHeight;
@@ -491,8 +505,9 @@ function updatePath(){
 
   //remove lines that aren't in the path anymore
   lines.exit().remove();
+}
 
-  //enable scrolling if not all nodes fit on the screen
+function toggleScrolling(path, newNodes, nodesRemoved){
   var leftContainerHeight = calculateLeftContainerHeight(path);
   if (leftContainerHeight > height / 2) {
     minTranslationY = height / 2 - (leftContainerHeight);
@@ -670,12 +685,8 @@ function onPopUpMenuMouseOut(element){
 function onPopUpMenuMouseUp(element){
   console.log("up "+element.data.cssClass);
 }
-/*
-b = d3.arc().outerRadius(200).innerRadius(160);
-g = leftSVG.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-a = d3.pie()([1,1,1])
-g.selectAll("path").data(a).enter().append("path").attr("d",b);
-p = g.select("path")
-p.attr("r",20)
-p.transition().attr("d", d3.arc().innerRadius(10).outerRadius(300)).duration(500)
-*/
+
+function touch(){
+  //d3.event.preventDefault();
+  var a = d3.touches(this);
+}
