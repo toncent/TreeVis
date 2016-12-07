@@ -114,8 +114,9 @@ function init(){
   //right half initialization
   rightNodeWidth = width*0.30;
   rightNodeHeight = height*0.25;
-  treeWidth = width/2 - rightNodeWidth*0.55;
-  treeHeight = height/2 - rightNodeHeight*0.55;
+  rightNodeRadius = Math.min(width, height)*.1;
+  treeWidth = width/2 - 2*rightNodeRadius;
+  treeHeight = height/2 - 2*rightNodeRadius;
 
   initPopUpMenu();
   updateTree(currentRoot);
@@ -126,7 +127,7 @@ function init(){
 }
 
 function calculateTextSize(d){
-  d.fontSize = (rightNodeWidth / this.getComputedTextLength())*0.9;
+  d.fontSize = (2*rightNodeRadius / this.getComputedTextLength())*0.9;
 }
 
 //creates a line using d3.line() according to the links source and target
@@ -143,6 +144,22 @@ function getLine(link){
 //decides the color of a node depending on its position in the tree
 function getNodeClass(node){
   return node.data.type;
+}
+
+function insertNodeName(node){
+  var textElement = d3.select(this),
+      text = node.data.name;
+
+      //remove all previous text
+  textElement.text(null);
+  
+  //add the caption to the text element
+  textElement.attr("font-size", "1em")
+             .text(node.data.name)
+             .attr("dominant-baseline", "central")
+             .attr("font-style", "italic")
+             .each(calculateTextSize)
+             .attr("font-size", function(d) {return Math.min(1.3, d.fontSize) + "em"});
 }
 
 //inserts line breaks into the text so it fits inside the corresponding rectangle
@@ -266,19 +283,18 @@ function updateRightSvgNodes(nodes){
   nodes.transition()
       .duration(animationDuration)
       .attr("transform", function(d){
-        return "translate(" + (d.x - rightNodeWidth/2) + "," + (d.y - rightNodeHeight/2) + ")"}
+        return "translate(" + (d.x) + "," + (d.y) + ")"}
       )
       .attr("class", getNodeClass);
 
   //update the sizes of nodes in case the screen size has changed
-  nodes.selectAll("rect")
-       .attr("width", rightNodeWidth)
-       .attr("height", rightNodeHeight);
+  nodes.selectAll("circle")
+       .attr("r", rightNodeRadius);
 
   //update text wrapping and shortening
   nodes.selectAll("text")
         .attr("text-anchor","middle")
-        .each(fillWithText);
+        .each(insertNodeName);
 }
 
 //creates svg nodes for all the newly added nodes
@@ -286,21 +302,20 @@ function createNewRightSvgNodes(newNodes){
   //nodes get text applied to them
   newNodes.insert("text")
           .attr("text-anchor","middle")
-          .each(fillWithText);
+          .each(insertNodeName);
   
   //nodes get a shape in the svg
-  newNodes.insert("rect", "text") 
-            .attr("width", rightNodeWidth)
-            .attr("height", rightNodeHeight);
+  newNodes.insert("circle", "text") 
+          .attr("r", rightNodeRadius);
 
   //set the new nodes positions to their parents starting position
   newNodes.attr("transform", function(d){
               if(d.parent){
                 d.x0 = d.parent.x;
                 d.y0 = d.parent.y;
-                return "translate(" + (d.x0 - rightNodeWidth/2) + "," + (d.y0 - rightNodeHeight/2) + ")";
+                return "translate(" + (d.x0) + "," + (d.y0) + ")";
               }
-              else return "translate(" + (d.x - rightNodeWidth/2) + "," + (d.y - rightNodeHeight/2) + ")";
+              else return "translate(" + (d.x) + "," + (d.y) + ")";
             })
           .attr("class", getNodeClass)
           //animate the node to fade in and go to it's correct position (starting from the parents previous position)
@@ -309,7 +324,7 @@ function createNewRightSvgNodes(newNodes){
             .duration(animationDuration)
             .delay(animationDuration)
             .attr("transform", function(d){
-              return "translate(" + (d.x - rightNodeWidth/2) + "," + (d.y - rightNodeHeight/2) + ")"}
+              return "translate(" + (d.x) + "," + (d.y) + ")"}
             )
             .attr("opacity", 1)
             //add the click listener after the animation has ended
@@ -321,6 +336,7 @@ function addMouseListeners(node){
   element = d3.select(this);
   element.on("click", nodeClicked);
   element.on("mousedown", startLongPressTimer);
+  element.on("mouseup", nodeMouseUp);
   element.on("touchstart", startLongPressTimer);
 }
 
@@ -359,6 +375,13 @@ function nodeClicked(node){
   }
   updateTree(currentRoot);
   updatePath();
+}
+
+function nodeMouseUp(){
+  if (longPressHappened) {
+    d3.event.stopPropagation();
+    closePopUpMenu();
+  }
 }
 
 //calculates where to put each node using the layout d3 came up with as polar coordinates
@@ -458,8 +481,8 @@ function createNewLeftSVGNodes(newNodes){
 
 function animateLeftSVGNodes(nodes, newNodes){
   nodes.transition()
-      .duration(animationDuration)
-      .attr("transform", getLeftNodeTransform);
+       .duration(animationDuration)
+       .attr("transform", getLeftNodeTransform);
 
   //new node is added at the bottom
   newNodes.attr("transform", getLeftNodeTransform);
@@ -621,6 +644,7 @@ function startLongPressTimer(node){
 function onMouseUp(){
   window.clearTimeout(longPressTimeout);
   if (menuNode) {
+    longPressHappened = false;
     closePopUpMenu();
   }
 }
@@ -628,18 +652,18 @@ function onMouseUp(){
 function onLongPress(node){
   console.log("long press");
   longPressHappened = true;
-  openPopUpMenu(mouseCoords[0], mouseCoords[1]);
+  openPopUpMenu(node.x, node.y);
   menuNode = node;
 }
 
 //generates a new popUpMenu using d3.arc and d3.pie
 function initPopUpMenu(){
-  popUpMenuRadius = Math.max(rightNodeHeight, rightNodeWidth) / 2;
-  arcGenerator = d3.arc().innerRadius(popUpMenuRadius * 0.4).outerRadius(popUpMenuRadius).padAngle(0.1);
+  popUpMenuRadius = rightNodeRadius;
+  arcGenerator = d3.arc().innerRadius(popUpMenuRadius).outerRadius(popUpMenuRadius*1.8).padAngle(0.1);
   //calculate the angles for a pie/donut chart with two equal sections
   donutChart = d3.pie()
                  .value(function(d){return d.value})
-                 ([{value:1, cssClass:"yay"},{value:1, color:"rgba(0,255,0,100);", cssClass:"nay"}]);
+                 ([{value:1, cssClass:"yay"}, {value:1, cssClass:"nay"}, {value:1, cssClass:"may"}]);
 }
 
 function openPopUpMenu(x,y){
@@ -650,7 +674,7 @@ function openPopUpMenu(x,y){
   popUpMenu.attr("transform", "translate(" + x + "," + y + ")");
 
   //add a path for each section of the donut chart to the popUpMenu and animate it
-  var smallArcGenerator = d3.arc().innerRadius(popUpMenuRadius * 0.3).outerRadius(popUpMenuRadius * 0.5).padAngle(0.1);
+  var smallArcGenerator = d3.arc().innerRadius(popUpMenuRadius).outerRadius(popUpMenuRadius+1).padAngle(0.1);
   popUpMenu.selectAll("path")
            .data(donutChart)
            .enter()
@@ -661,7 +685,7 @@ function openPopUpMenu(x,y){
            .transition()
               .attr("d", arcGenerator)
               .ease(d3.easeElastic)
-              .duration(animationDuration);
+              .duration(animationDuration*2);
 }
 
 function closePopUpMenu(){
@@ -675,11 +699,11 @@ function addPopUpMenuListeners(){
 }
 
 function onPopUpMenuMouseOver(){
-  d3.select(this).transition().attr("d", d3.arc().outerRadius(popUpMenuRadius * 1.2).innerRadius(popUpMenuRadius * 0.4).padAngle(0.1)).duration(animationDuration);
+  d3.select(this).transition().attr("d", d3.arc().outerRadius(popUpMenuRadius * 2).innerRadius(popUpMenuRadius).padAngle(0.1)).duration(animationDuration);
 }
 
 function onPopUpMenuMouseOut(element){
-  d3.select(this).transition().attr("d", arcGenerator).duration(animationDuration).ease(d3.easeBounce);
+  d3.select(this).transition().attr("d", arcGenerator).duration(animationDuration*2).ease(d3.easeBounce);
 }
 
 function onPopUpMenuMouseUp(element){

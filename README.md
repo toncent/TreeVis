@@ -13,5 +13,7 @@
 
  - (29.11.2016) Alle Knoten werden auf der linken Seite so groß dargestellt, dass ihr gesamter Text angezeigt werden kann. Wenn nicht mehr genug Knoten auf den Bildschirm passen kann gescrollt werden. Die Anwendung soll dadurch weniger überladen mit Funktionen werden.
 
+ - (06.12.2016) Knoten rechts werden als Kreise angezeigt und beinhalten nur den Namen des Knotens.
+
  # Fragen an Ärzte
  - Ist es besser auf der Linken seite das neueste ganz oben anzuzeigen oder es von oben nach unten anzuordnen und das neueste in die Mitte des Bildschirms zu scrollen

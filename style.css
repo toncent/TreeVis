@@ -29,19 +29,19 @@ rect {
 }
 
 .diagnosis {
-  fill : rgb(255,255,100);
+  fill : rgb(255,255,180);
 }
 
 .symptom {
-  fill : rgb(255,100,255);
+  fill : rgb(255,180,255);
 }
 
 .examination {
-  fill : rgb(255,100,100);
+  fill : rgb(255,180,180);
 }
 
 .therapy {
-  fill : rgb(100,255,255);
+  fill : rgb(180,255,255);
 }
 
 path {
@@ -50,10 +50,17 @@ path {
 
 path.nay {
   fill: rgba(255,0,0,0.5);
+  stroke: rgb(120,120,120);
 }
 
 path.yay {
   fill: rgba(0,255,0,0.5);
+  stroke: rgb(120,120,120);
+}
+
+path.may {
+  fill: rgba(255,255,0,0.5);
+  stroke: rgb(120,120,120);
 }
 
 text {
