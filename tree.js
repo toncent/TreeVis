@@ -28,11 +28,14 @@ var dragStartY, translationY = 0, minTranslationY, scrollingEnabled = false;
 
 var longPressHappened = false;
 
-var popUpMenu, popUpMenuRadius, arcGenerator, donutChart, menuNode, mouseCoords;
+var popUpMenu, popUpMenuRadius, arcGenerator, donutChart, menuNode;
 
 //############################
 // Initialization
 //############################
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+}, false);
 fetchDataAndInitialize();
 
 //############################
@@ -97,8 +100,9 @@ function initHtmlElements(){
   leftSvgLinkGroup = leftSVG.append("g");
   leftSvgNodeGroup = leftSVG.append("g");
 
-  rightSVG.on("mouseup", onMouseUp);
-  //rightSVG.on("mouseout", onMouseUp);
+  rightSVG.on("mouseup", stopLongPressTimer)
+          .on("click", closePopUpMenu);
+  //rightSVG.on("mouseout", stopLongPressTimer);
 }
 
 function init(){
@@ -334,10 +338,10 @@ function createNewRightSvgNodes(newNodes){
 function addMouseListeners(node){
   //give all new nodes a click listener
   element = d3.select(this);
-  element.on("click", nodeClicked);
-  element.on("mousedown", startLongPressTimer);
-  element.on("mouseup", nodeMouseUp);
-  element.on("touchstart", startLongPressTimer);
+  element.on("click", nodeClicked)
+         .on("mousedown", startLongPressTimer)
+         .on("touchstart", startLongPressTimer)
+         .on("touchend", stopLongPressTimer);
 }
 
 function updateRightSvgLinks(links){
@@ -375,13 +379,6 @@ function nodeClicked(node){
   }
   updateTree(currentRoot);
   updatePath();
-}
-
-function nodeMouseUp(){
-  if (longPressHappened) {
-    d3.event.stopPropagation();
-    closePopUpMenu();
-  }
 }
 
 //calculates where to put each node using the layout d3 came up with as polar coordinates
@@ -635,31 +632,27 @@ function executeScrolling(shouldAnimate){
 //############################
 // Popup Menu
 //############################
-
 function startLongPressTimer(node){
-  mouseCoords = d3.mouse(rightSVG.node());
-  longPressTimeout = window.setTimeout(onLongPress, 500, node);
+  if(!menuNode){
+    menuNode = d3.select(this);
+    longPressTimeout = window.setTimeout(onLongPress, 500, node);
+  }
 }
 
-function onMouseUp(){
+function stopLongPressTimer(){
   window.clearTimeout(longPressTimeout);
-  if (menuNode) {
-    longPressHappened = false;
-    closePopUpMenu();
-  }
 }
 
 function onLongPress(node){
   console.log("long press");
   longPressHappened = true;
   openPopUpMenu(node.x, node.y);
-  menuNode = node;
 }
 
 //generates a new popUpMenu using d3.arc and d3.pie
 function initPopUpMenu(){
   popUpMenuRadius = rightNodeRadius;
-  arcGenerator = d3.arc().innerRadius(popUpMenuRadius).outerRadius(popUpMenuRadius*1.8).padAngle(0.1);
+  arcGenerator = d3.arc().innerRadius(popUpMenuRadius + 2.5).outerRadius(popUpMenuRadius*1.8).padAngle(0.1);
   //calculate the angles for a pie/donut chart with two equal sections
   donutChart = d3.pie()
                  .value(function(d){return d.value})
@@ -689,28 +682,33 @@ function openPopUpMenu(x,y){
 }
 
 function closePopUpMenu(){
-  popUpMenu.remove();
+  if (menuNode) {
+    popUpMenu.attr("opacity", 1).transition().duration(animationDuration).attr("opacity", 0).on("end", function(){popUpMenu.remove()});
+    menuNode = undefined;
+    longPressHappened = false;
+  };
 }
 
 function addPopUpMenuListeners(){
-  d3.select(this).on("mouseover", onPopUpMenuMouseOver)
-                    .on("mouseout", onPopUpMenuMouseOut)
-                    .on("mouseup", onPopUpMenuMouseUp);
+  d3.select(this).on("click", onPopUpMenuClick);
 }
 
-function onPopUpMenuMouseOver(){
-  d3.select(this).transition().attr("d", d3.arc().outerRadius(popUpMenuRadius * 2).innerRadius(popUpMenuRadius).padAngle(0.1)).duration(animationDuration);
+function onPopUpMenuMouseDown(){
+  d3.select(this).transition().attr("d", d3.arc().outerRadius(popUpMenuRadius * 2).innerRadius(popUpMenuRadius+2.5).padAngle(0.1)).duration(animationDuration);
 }
 
 function onPopUpMenuMouseOut(element){
   d3.select(this).transition().attr("d", arcGenerator).duration(animationDuration*2).ease(d3.easeBounce);
 }
 
-function onPopUpMenuMouseUp(element){
-  console.log("up "+element.data.cssClass);
-}
-
-function touch(){
-  //d3.event.preventDefault();
-  var a = d3.touches(this);
+function onPopUpMenuClick(element){
+  var circle = menuNode.select("circle");
+  var menuButton = d3.select(this);
+  circle.classed("yay", false);
+  circle.classed("nay", false);
+  circle.classed("may", false);
+  if (menuButton.classed("yay")) circle.classed("yay", true);
+  else if (menuButton.classed("nay")) circle.classed("nay", true);
+  else if (menuButton.classed("may")) circle.classed("may", true);
+  closePopUpMenu();
 }

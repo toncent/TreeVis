@@ -20,8 +20,12 @@ line {
   stroke : #000;
 }
 
-circle, ellipse, path {
+path {
   stroke : #000;
+}
+
+circle {
+  stroke : none;
 }
 
 rect {
@@ -48,19 +52,37 @@ path {
   fill : none;
 }
 
+.yay{
+  stroke: rgba(60,225,60,1);
+  stroke-width : 5;
+}
+
+.nay{
+  stroke: rgba(230,100,100,1);
+  stroke-width : 5;
+}
+
+.may{
+  stroke: rgba(222,222,0,1);
+  stroke-width : 5;
+}
+
 path.nay {
   fill: rgba(255,0,0,0.5);
-  stroke: rgb(120,120,120);
+  stroke: none;
+  stroke-width : 1;
 }
 
 path.yay {
   fill: rgba(0,255,0,0.5);
-  stroke: rgb(120,120,120);
+  stroke: none;
+  stroke-width : 1;
 }
 
 path.may {
   fill: rgba(255,255,0,0.5);
-  stroke: rgb(120,120,120);
+  stroke: none;
+  stroke-width : 1;
 }
 
 text {
