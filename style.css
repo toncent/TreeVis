@@ -96,9 +96,9 @@ text {
 }
 
 .close-btn{
-  position: fixed; 
-  top: 10px; 
-  left: 10px;
+  padding: 10px;
+  position: fixed;
+  cursor: pointer;
 }
 
 .loader {
@@ -117,4 +117,39 @@ text {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+.half-screen{
+  float:left;
+}
+
+.left{
+
+}
+
+/* Landscape */
+@media screen and (min-width: 1000px) {
+   .half-screen {
+      width: 50%;
+   }
+   .hide-two-pane{
+      display: none !important;
+   }
+   .hide-one-pane{
+      display: block !important;
+   }
+}
+
+/* Portrait */
+@media screen and (max-width: 999px) {
+   .half-screen {
+      width: 50%;
+      width: 100%;
+   }
+   .hide-two-pane{
+      display: block;
+   }
+   .hide-one-pane{
+      display: none;
+   }
 }

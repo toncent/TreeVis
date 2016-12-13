@@ -370,6 +370,8 @@ function nodeClicked(node){
     d3.event.stopPropagation();
     return;
   }
+  menuNode = undefined;
+  menuNodeSVG = undefined;
   //if the current root is clicked then hide it's children and make it's parent 
   //the root unless the clicked node is the root of the whole tree with hidden children.
   if (node == currentRoot && (node.children || node.parent)) {

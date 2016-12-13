@@ -11,11 +11,11 @@
     <div class="w3-display-middle loader"></div>
   </div>
   <div class="w3-row full-height" id="main-container" style="display:none">
-    <span class="w3-opennav w3-hide-medium w3-hide-large close-btn" id="openSideNav" onclick="openSideNav()">&#9776;</span>
-    <div class="w3-white w3-rightbar w3-border-blue w3-half w3-hide-small w3-animate-left full-height" id="leftContainer">
-      <a onclick="closeSideNav()" class="w3-closenav w3-hide-medium w3-hide-large">&times;</a>
+    <div class="w3-white w3-rightbar w3-border-blue half-screen hide-one-pane w3-animate-left full-height" id="leftContainer">
+      <a onclick="closeSideNav()" class="hide-two-pane close-btn">&times;</a>
     </div>
-    <div class="w3-rest full-height" id="rightContainer" style="height:100%">
+    <div class="w3-rest full-height" id="rightContainer">
+      <span class="w3-opennav hide-two-pane close-btn" id="openSideNav" onclick="openSideNav()">&#9776;</span>
       <script src="tree.js"></script>
     </div>
   </div>
