@@ -28,7 +28,7 @@ var dragStartY, translationY = 0, minTranslationY, scrollingEnabled = false;
 
 var longPressHappened = false;
 
-var popUpMenu, popUpMenuRadius, arcGenerator, donutChart, menuNode;
+var popUpMenu, popUpMenuRadius, arcGenerator, donutChart, menuNodeSVG, menuNode;
 
 //############################
 // Initialization
@@ -102,7 +102,6 @@ function initHtmlElements(){
 
   rightSVG.on("mouseup", stopLongPressTimer)
           .on("click", closePopUpMenu);
-  //rightSVG.on("mouseout", stopLongPressTimer);
 }
 
 function init(){
@@ -310,7 +309,8 @@ function createNewRightSvgNodes(newNodes){
   
   //nodes get a shape in the svg
   newNodes.insert("circle", "text") 
-          .attr("r", rightNodeRadius);
+          .attr("r", rightNodeRadius)
+          .attr("class", getCircleClass);
 
   //set the new nodes positions to their parents starting position
   newNodes.attr("transform", function(d){
@@ -333,6 +333,10 @@ function createNewRightSvgNodes(newNodes){
             .attr("opacity", 1)
             //add the click listener after the animation has ended
             .on("end", addMouseListeners);
+}
+
+function getCircleClass(node){
+  return node.data.status || "";
 }
 
 function addMouseListeners(node){
@@ -363,6 +367,7 @@ function createNewRightSvgLinks(newLinks){
 function nodeClicked(node){
   if (longPressHappened) {
     longPressHappened = false;
+    d3.event.stopPropagation();
     return;
   }
   //if the current root is clicked then hide it's children and make it's parent 
@@ -457,6 +462,7 @@ function updateLeftSVGNodes(nodes){
 
   //update width and height of already existing nodes
   leftSvgNodeGroup.selectAll("rect")
+        .attr("class", getRectClass)
         .transition()
         .duration(animationDuration)
         .attr("width", leftNodeWidth)
@@ -473,7 +479,7 @@ function createNewLeftSVGNodes(newNodes){
   newNodes.insert("rect", "text")
           .attr("width", leftNodeWidth)
           .attr("height", getLeftNodeHeight)
-          .attr("class", getNodeClass);
+          .attr("class", getRectClass);
 }
 
 function animateLeftSVGNodes(nodes, newNodes){
@@ -581,6 +587,11 @@ function getLeftNodeTransform(node, i){
   return "translate(" + xTranslate + "," + yTranslate + ")";
 }
 
+function getRectClass(node){
+  var strokeClass = node.data.status ? node.data.status + " " : "";
+  return strokeClass + getNodeClass(node);
+}
+
 //############################
 // Scrolling behaviour
 //############################
@@ -634,7 +645,8 @@ function executeScrolling(shouldAnimate){
 //############################
 function startLongPressTimer(node){
   if(!menuNode){
-    menuNode = d3.select(this);
+    menuNode = node;
+    menuNodeSVG = d3.select(this);
     longPressTimeout = window.setTimeout(onLongPress, 500, node);
   }
 }
@@ -644,13 +656,13 @@ function stopLongPressTimer(){
 }
 
 function onLongPress(node){
-  console.log("long press");
   longPressHappened = true;
   openPopUpMenu(node.x, node.y);
 }
 
 //generates a new popUpMenu using d3.arc and d3.pie
 function initPopUpMenu(){
+  closePopUpMenu();
   popUpMenuRadius = rightNodeRadius;
   arcGenerator = d3.arc().innerRadius(popUpMenuRadius + 2.5).outerRadius(popUpMenuRadius*1.8).padAngle(0.1);
   //calculate the angles for a pie/donut chart with two equal sections
@@ -684,31 +696,33 @@ function openPopUpMenu(x,y){
 function closePopUpMenu(){
   if (menuNode) {
     popUpMenu.attr("opacity", 1).transition().duration(animationDuration).attr("opacity", 0).on("end", function(){popUpMenu.remove()});
+    menuNodeSVG = undefined;
     menuNode = undefined;
     longPressHappened = false;
   };
 }
 
 function addPopUpMenuListeners(){
-  d3.select(this).on("click", onPopUpMenuClick);
-}
-
-function onPopUpMenuMouseDown(){
-  d3.select(this).transition().attr("d", d3.arc().outerRadius(popUpMenuRadius * 2).innerRadius(popUpMenuRadius+2.5).padAngle(0.1)).duration(animationDuration);
-}
-
-function onPopUpMenuMouseOut(element){
-  d3.select(this).transition().attr("d", arcGenerator).duration(animationDuration*2).ease(d3.easeBounce);
+  d3.select(this).on("click", onPopUpMenuClick)
+                 .on("touchend", onPopUpMenuClick);
 }
 
 function onPopUpMenuClick(element){
-  var circle = menuNode.select("circle");
+  d3.event.stopPropagation();
+  var circle = menuNodeSVG.select("circle");
   var menuButton = d3.select(this);
+  menuNode.data.status = menuButton.attr("class")
+  menuButton.transition()
+            .duration(animationDuration)
+            .on("end", closePopUpMenu)
+            .attr("d", d3.arc()
+                         .outerRadius(popUpMenuRadius * 2)
+                         .innerRadius(popUpMenuRadius + 2.5)
+                         .padAngle(0.1)
+                  );
   circle.classed("yay", false);
   circle.classed("nay", false);
   circle.classed("may", false);
-  if (menuButton.classed("yay")) circle.classed("yay", true);
-  else if (menuButton.classed("nay")) circle.classed("nay", true);
-  else if (menuButton.classed("may")) circle.classed("may", true);
-  closePopUpMenu();
+  circle.classed(menuButton.attr("class"), true);
+  updatePath();
 }

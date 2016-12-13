@@ -25,7 +25,8 @@ path {
 }
 
 circle {
-  stroke : none;
+  stroke-width: 0;
+  transition: stroke-width 400ms, stroke 400ms;
 }
 
 rect {
