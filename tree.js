@@ -56,7 +56,7 @@ function handleJsonResponse(arr){
   lineGenerator = d3.line();
   //collapse the tree to only show the currentRoot and it's children
   currentRoot.children.forEach(collapseAllChildren);
-  window.addEventListener("resize", init);
+  window.addEventListener("resize", init2);
   init();
 }
 
@@ -102,6 +102,11 @@ function initHtmlElements(){
 
   rightSVG.on("mouseup", stopLongPressTimer)
           .on("click", closePopUpMenu);
+}
+
+function init2(){
+  console.log("resize");
+  init();
 }
 
 function init(){
@@ -370,8 +375,7 @@ function nodeClicked(node){
     d3.event.stopPropagation();
     return;
   }
-  menuNode = undefined;
-  menuNodeSVG = undefined;
+  closePopUpMenu();
   //if the current root is clicked then hide it's children and make it's parent 
   //the root unless the clicked node is the root of the whole tree with hidden children.
   if (node == currentRoot && (node.children || node.parent)) {
@@ -458,6 +462,7 @@ function updatePath(){
 }
 
 function updateLeftSVGNodes(nodes){
+    console.log("update");
   //recalculate how to wrap the text to fit inside it's container
   nodes.selectAll("text")
        .each(fillWithText);
@@ -472,6 +477,7 @@ function updateLeftSVGNodes(nodes){
 }
 
 function createNewLeftSVGNodes(newNodes){
+    console.log("create new");
   //calculate text wrapping for all new nodes
   newNodes.insert("text")
           .attr("text-anchor","middle")
@@ -485,6 +491,7 @@ function createNewLeftSVGNodes(newNodes){
 }
 
 function animateLeftSVGNodes(nodes, newNodes){
+    console.log("animate");
   nodes.transition()
        .duration(animationDuration)
        .attr("transform", getLeftNodeTransform);
@@ -492,14 +499,12 @@ function animateLeftSVGNodes(nodes, newNodes){
   //new node is added at the bottom
   newNodes.attr("transform", getLeftNodeTransform);
   
-  //hide new nodes to fade them in later
-  newNodes.attr("opacity", 0);
-  
   //fade in new nodes after old nodes have moved to new positions
-  newNodes.transition()
+  newNodes.attr("opacity", 0).transition()
           .duration(animationDuration)
           .delay(animationDuration)
-          .attr("opacity", 1);
+          .attr("opacity", 1)
+          .on("interrupt", function(){console.log("interrupted")});
 }
 
 function updateLeftSVGLinks(path){
@@ -670,7 +675,7 @@ function initPopUpMenu(){
   //calculate the angles for a pie/donut chart with two equal sections
   donutChart = d3.pie()
                  .value(function(d){return d.value})
-                 ([{value:1, cssClass:"yay"}, {value:1, cssClass:"nay"}, {value:1, cssClass:"may"}]);
+                 ([{value:1, cssClass:"positive"}, {value:1, cssClass:"negative"}, {value:1, cssClass:"unknown"}]);
 }
 
 function openPopUpMenu(x,y){
@@ -722,9 +727,9 @@ function onPopUpMenuClick(element){
                          .innerRadius(popUpMenuRadius + 2.5)
                          .padAngle(0.1)
                   );
-  circle.classed("yay", false);
-  circle.classed("nay", false);
-  circle.classed("may", false);
+  circle.classed("positive", false);
+  circle.classed("negative", false);
+  circle.classed("unknown", false);
   circle.classed(menuButton.attr("class"), true);
   updatePath();
 }

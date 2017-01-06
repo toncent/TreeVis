@@ -53,34 +53,34 @@ path {
   fill : none;
 }
 
-.yay{
+.positive{
   stroke: rgba(60,225,60,1);
   stroke-width : 5;
 }
 
-.nay{
+.negative{
   stroke: rgba(230,100,100,1);
   stroke-width : 5;
 }
 
-.may{
+.unknown{
   stroke: rgba(222,222,0,1);
   stroke-width : 5;
 }
 
-path.nay {
+path.negative {
   fill: rgba(255,0,0,0.5);
   stroke: none;
   stroke-width : 1;
 }
 
-path.yay {
+path.positive {
   fill: rgba(0,255,0,0.5);
   stroke: none;
   stroke-width : 1;
 }
 
-path.may {
+path.unknown {
   fill: rgba(255,255,0,0.5);
   stroke: none;
   stroke-width : 1;
@@ -121,10 +121,6 @@ text {
 
 .half-screen{
   float:left;
-}
-
-.left{
-
 }
 
 /* Landscape */
