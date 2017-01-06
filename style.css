@@ -123,6 +123,18 @@ text {
   float:left;
 }
 
+.flex-container{
+  display:flex;
+  flex-direction: column;
+}
+
+.flex-list{
+  display:flex;
+  overflow: auto;
+  flex-direction: column;
+  margin-bottom: 25px !important;
+}
+
 /* Landscape */
 @media screen and (min-width: 1000px) {
    .half-screen {

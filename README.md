@@ -17,3 +17,6 @@
 
  # Fragen an Ärzte
  - Ist es besser auf der Linken seite das neueste ganz oben anzuzeigen oder es von oben nach unten anzuordnen und das neueste in die Mitte des Bildschirms zu scrollen
+
+ #Quellen
+ - getCookie function in patients.js kopiert von http://www.w3schools.com/js/js_cookies.asp
