@@ -1,67 +1,67 @@
 var userCookie;
 var patients;
-var listItems;
+var graphs;
+var patientListItems, graphListItems;
+var currentTab = "patients-tab";
 
 function init(){
   //retrieve the contents of the user cookie that was set in login.js
   if(getCookie("treeVisUser")){
     userCookie = JSON.parse(getCookie("treeVisUser"));
+  } else {
+    window.location.href = "login.html";
   }
-  //load patients from server
-  loadPatients();
+  //load patients and graphs from server
+  loadData();
 }
 
-//returns the content of the cookie with the provided name (taken from w3schools)
-function getCookie(cname) {
-  var name = cname + "=";
-  var decodedCookie = decodeURIComponent(document.cookie);
-  var ca = decodedCookie.split(';');
-  for(var i = 0; i <ca.length; i++) {
-    var c = ca[i];
-    while (c.charAt(0) == ' ') {
-      c = c.substring(1);
-    }
-    if (c.indexOf(name) == 0) {
-      return c.substring(name.length, c.length);
-    }
-  }
-  return "";
-}
-
-function loadPatients(){
+function loadData(){
   //request all patients
-  d3.json("http://10.200.1.75:8016/patients/all").get(null, createPatientList);
+  d3.json("http://10.200.1.75:8016/patients/all").get(null, fillPatientList);
+  d3.json("http://10.200.1.75:8016/graphs/all-trees").get(null, fillGraphList);
 }
 
-/*function createPatientList(arr){
-  document.getElementById("loader-container").style.display = "none";
-  patients = arr;
-  console.log(patients);
-  var patientList = document.getElementById("patient-list");
-  var innerHTML = "";
-  for (var i = 0; i < patients.length; i++) {
-    innerHTML += "<li class=\"w3-padding-16 w3-hover-blue\">" +
-                        "<span class=\"w3-xlarge\">" + patients[i].firstname + " " + patients[i].lastname + "</span><br>" +
-                        "<span>" + "Geboren: " + convertToDate(patients[i].dateOfBirth) + "</span>" +
-                      "</li>";
-  };
-  patientList.innerHTML += innerHTML;
-}*/
-
-function createPatientList(arr){
+function fillPatientList(arr){
   patients = arr;
   document.getElementById("loader-container").style.display = "none";
-  listItems = d3.select("ul").selectAll("li").data(patients);
-  listItems = listItems.enter().append("li").classed("w3-padding-16 w3-hover-blue", true);
-  listItems.append("span").classed("w3-xlarge", true).text(getPatientName);
-  listItems.append("br");
-  listItems.append("span").text(getPatientDateOfBirth);
+  patientListItems = d3.select("ul#patient-list").selectAll("li").data(patients);
+  patientListItems = patientListItems.enter().append("li").classed("w3-padding-16 w3-hover-blue", true);
+  patientListItems.append("span").classed("w3-xlarge", true).text(getItemName);
+  patientListItems.append("br");
+  patientListItems.append("span").text(getPatientDateOfBirth);
+  patientListItems.on("click", patientListItemClicked);
 }
 
-function getPatientName(patient){
-  return patient.firstname + " " + patient.lastname;
+function fillGraphList(arr){
+  graphs = arr;
+  graphListItems = d3.select("ul#graph-list").selectAll("li").data(graphs);
+  graphListItems = graphListItems.enter().append("li").classed("w3-padding-16 w3-hover-blue", true);
+  graphListItems.append("span").classed("w3-xlarge", true).text(getItemName);
+  graphListItems.on("click", graphListItemClicked);
+}
+
+function getItemName(item){
+  return item.graphName || item.firstname + " " + item.lastname;
 }
 
 function getPatientDateOfBirth(patient){
   return "01.01.2000"
+}
+
+function patientListItemClicked(patient){
+  setCookie("treeVisPatient", patient.id, 1);
+}
+
+function graphListItemClicked(graph){
+  setCookie("treeVisGraph", graph.id, 1);
+}
+
+function openTab(tabId){
+  if (tabId != currentTab) {
+    document.getElementById(currentTab).style.display = "none";
+    document.getElementById(tabId).style.display = "flex";
+    d3.select("a#"+tabId+"-link").classed("w3-blue", true);
+    d3.select("a#"+currentTab+"-link").classed("w3-blue", false);
+    currentTab = tabId;
+  }
 }

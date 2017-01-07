@@ -133,6 +133,7 @@ text {
   overflow: auto;
   flex-direction: column;
   margin-bottom: 25px !important;
+  margin-top: 10px !important;
 }
 
 /* Landscape */

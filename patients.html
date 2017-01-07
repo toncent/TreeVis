@@ -4,69 +4,24 @@
     <link rel="stylesheet" type="text/css" href="style.css"/>
     <link rel="stylesheet" href="w3.css">
     <script src="d3.js"></script>
+    <script src="cookies.js"></script>
     <script src="patients.js"></script>
 </head>
 <body onload="init()">
+    <ul class="w3-navbar w3-card-2">
+        <li><a href="javascript:void(0)" onclick="openTab('patients-tab')" class="w3-blue" id="patients-tab-link">Patienten</a></li>
+        <li><a href="javascript:void(0)" onclick="openTab('diagnosis-tab')" id="diagnosis-tab-link">Diagnosen</a></li>
+    </ul>
     <div class="w3-display-container full-height" id="loader-container">
         <div class="w3-display-middle loader"></div>
     </div>
-    <div class="w3-container flex-container full-height" id="page-content">
-        <h1 class="w3-bottombar w3-border-blue">Patienten</h1>
+    <div class="w3-container flex-container full-height" id="patients-tab">
         <ul class="w3-ul w3-card-4 flex-list" id="patient-list">
-            <li class="w3-padding-16 w3-hover-blue">
-                <span>asdasd</span>
-            </li>
-            <li class="w3-padding-16 w3-hover-blue">
-                <span>asdasd</span>
-            </li>
-            <li class="w3-padding-16 w3-hover-blue">
-                <span>asdasd</span>
-            </li>
-            <li class="w3-padding-16 w3-hover-blue">
-                <span>asdasd</span>
-            </li>
-            <li class="w3-padding-16 w3-hover-blue">
-                <span>asdasd</span>
-            </li>
-            <li class="w3-padding-16 w3-hover-blue">
-                <span>asdasd</span>
-            </li>
-            <li class="w3-padding-16 w3-hover-blue">
-                <span>asdasd</span>
-            </li>
-            <li class="w3-padding-16 w3-hover-blue">
-                <span>asdasd</span>
-            </li>
-            <li class="w3-padding-16 w3-hover-blue">
-                <span>asdasd</span>
-            </li>
-            <li class="w3-padding-16 w3-hover-blue">
-                <span>asdasd</span>
-            </li>
-            <li class="w3-padding-16 w3-hover-blue">
-                <span>asdasd</span>
-            </li>
-            <li class="w3-padding-16 w3-hover-blue">
-                <span>asdasd</span>
-            </li>
-            <li class="w3-padding-16 w3-hover-blue">
-                <span>asdasd</span>
-            </li>
-            <li class="w3-padding-16 w3-hover-blue">
-                <span>asdasd</span>
-            </li>
-            <li class="w3-padding-16 w3-hover-blue">
-                <span>asdasd</span>
-            </li>
-            <li class="w3-padding-16 w3-hover-blue">
-                <span>asdasd</span>
-            </li>
-            <li class="w3-padding-16 w3-hover-blue">
-                <span>asdasd</span>
-            </li>
-            <li class="w3-padding-16 w3-hover-blue">
-                <span>asdasd</span>
-            </li>
+        </ul>
+    </div>
+    <div class="w3-container flex-container full-height" style="display:none" id="diagnosis-tab">
+        <ul class="w3-ul w3-card-4 flex-list" id="graph-list">
+            <!--li class="w3-padding-16 w3-hover-blue"><span class="w3-xlarge">asdasd</span></li-->
         </ul>
     </div>
 </body>
