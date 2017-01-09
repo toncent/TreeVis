@@ -30,6 +30,8 @@ var longPressHappened = false;
 
 var popUpMenu, popUpMenuRadius, arcGenerator, donutChart, menuNodeSVG, menuNode;
 
+var treeVisPatient, treeVisGraph;
+
 //############################
 // Initialization
 //############################
@@ -43,7 +45,13 @@ fetchDataAndInitialize();
 //############################
 function fetchDataAndInitialize(){
   //load example tree data from json file
-  d3.json("http://10.200.1.75:8012/tree?hops=15&name=graphdiarrhea1").get(null, handleJsonResponse);
+  treeVisGraph = getCookie("treeVisGraph");
+  treeVisPatient = getCookie("treeVisPatient");
+  if (treeVisGraph && treeVisPatient) {
+    d3.json("http://10.200.1.75:8012/tree?hops=15&name=" + treeVisGraph).get(null, handleJsonResponse);
+  } else {
+    window.location.href = "login.html";  
+  }
   //d3.json("exampleTree.json").get(null, handleJsonResponse);
 }
 
@@ -702,7 +710,7 @@ function openPopUpMenu(x,y){
 
 function closePopUpMenu(){
   if (menuNode) {
-    popUpMenu.attr("opacity", 1).transition().duration(animationDuration).attr("opacity", 0).on("end", function(){popUpMenu.remove()});
+    if (popUpMenu) popUpMenu.attr("opacity", 1).transition().duration(animationDuration).attr("opacity", 0).on("end", function(){popUpMenu.remove()});
     menuNodeSVG = undefined;
     menuNode = undefined;
     longPressHappened = false;

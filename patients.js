@@ -25,7 +25,7 @@ function fillPatientList(arr){
   patients = arr;
   document.getElementById("loader-container").style.display = "none";
   patientListItems = d3.select("ul#patient-list").selectAll("li").data(patients);
-  patientListItems = patientListItems.enter().append("li").classed("w3-padding-16 w3-hover-blue", true);
+  patientListItems = patientListItems.enter().append("li").classed("w3-padding-16 w3-hover-blue", true).style("cursor", "pointer");
   patientListItems.append("span").classed("w3-xlarge", true).text(getItemName);
   patientListItems.append("br");
   patientListItems.append("span").text(getPatientDateOfBirth);
@@ -35,7 +35,7 @@ function fillPatientList(arr){
 function fillGraphList(arr){
   graphs = arr;
   graphListItems = d3.select("ul#graph-list").selectAll("li").data(graphs);
-  graphListItems = graphListItems.enter().append("li").classed("w3-padding-16 w3-hover-blue", true);
+  graphListItems = graphListItems.enter().append("li").classed("w3-padding-16 w3-hover-blue", true).style("cursor", "pointer");
   graphListItems.append("span").classed("w3-xlarge", true).text(getItemName);
   graphListItems.on("click", graphListItemClicked);
 }
@@ -45,15 +45,17 @@ function getItemName(item){
 }
 
 function getPatientDateOfBirth(patient){
-  return "01.01.2000"
+  return new Date(patient.dateOfBirth / 10000000).toDateString();
 }
 
 function patientListItemClicked(patient){
   setCookie("treeVisPatient", patient.id, 1);
+  openTab("diagnosis-tab");
 }
 
 function graphListItemClicked(graph){
-  setCookie("treeVisGraph", graph.id, 1);
+  setCookie("treeVisGraph", graph.graphDBId, 1);
+  window.location.href = "treeVis.html"
 }
 
 function openTab(tabId){
