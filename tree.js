@@ -28,7 +28,7 @@ var dragStartY, translationY = 0, minTranslationY, scrollingEnabled = false;
 
 var longPressHappened = false;
 
-var popUpMenu, popUpMenuRadius, arcGenerator, donutChart, menuNodeSVG, menuNode;
+var popUpMenu, popUpMenuRadius, arcGenerator, smallArcGenerator, donutChart, menuNodeSVG, menuNode;
 
 var treeVisPatient, treeVisGraph;
 
@@ -694,7 +694,7 @@ function openPopUpMenu(x,y){
   popUpMenu.attr("transform", "translate(" + x + "," + y + ")");
 
   //add a path for each section of the donut chart to the popUpMenu and animate it
-  var smallArcGenerator = d3.arc().innerRadius(popUpMenuRadius).outerRadius(popUpMenuRadius+1).padAngle(0.1);
+  smallArcGenerator = d3.arc().innerRadius(popUpMenuRadius).outerRadius(popUpMenuRadius+1).padAngle(0.1);
   popUpMenu.selectAll("path")
            .data(donutChart)
            .enter()
@@ -702,6 +702,7 @@ function openPopUpMenu(x,y){
            .attr("class", function(d){return d.data.cssClass})
            .attr("d", smallArcGenerator)
            .each(addPopUpMenuListeners)
+           .each(addPopUpMenuImages)
            .transition()
               .attr("d", arcGenerator)
               .ease(d3.easeElastic)
@@ -720,6 +721,29 @@ function closePopUpMenu(){
 function addPopUpMenuListeners(){
   d3.select(this).on("click", onPopUpMenuClick)
                  .on("touchend", onPopUpMenuClick);
+}
+
+function addPopUpMenuImages(d){
+  var image = "img/" + d.data.cssClass + ".png";
+  popUpMenu.insert("svg:image", "path")
+           .attr("xlink:href", image)
+           .attr("width", getPopUpMenuIconSizeSmall)
+           .attr("height", getPopUpMenuIconSizeSmall)
+           .attr("x", function(){return smallArcGenerator.centroid(d)[0] - getPopUpMenuIconSizeSmall() / 2})
+           .attr("y", function(){return smallArcGenerator.centroid(d)[1] - getPopUpMenuIconSizeSmall() / 2})
+           .transition().duration(animationDuration*2).ease(d3.easeElastic)
+              .attr("width", getPopUpMenuIconSize)
+              .attr("height", getPopUpMenuIconSize)
+              .attr("x", function(){return arcGenerator.centroid(d)[0] - getPopUpMenuIconSize() / 2})
+              .attr("y", function(){return arcGenerator.centroid(d)[1] - getPopUpMenuIconSize() / 2});
+}
+
+function getPopUpMenuIconSizeSmall(){
+  return (smallArcGenerator.outerRadius()() - smallArcGenerator.innerRadius()()) * 0.8;
+}
+
+function getPopUpMenuIconSize(){
+  return (arcGenerator.outerRadius()() - arcGenerator.innerRadius()()) * 0.8;
 }
 
 function onPopUpMenuClick(element){
