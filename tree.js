@@ -50,7 +50,8 @@ function fetchDataAndInitialize(){
   if (treeVisGraph && treeVisPatient) {
     d3.json("http://10.200.1.75:8012/tree?hops=15&name=" + treeVisGraph).get(null, handleJsonResponse);
   } else {
-    window.location.href = "login.html";  
+    d3.json("http://10.200.1.75:8012/tree?hops=15&name=graphdiarrhea1").get(null, handleJsonResponse);
+    //window.location.href = "login.html";  
   }
   //d3.json("exampleTree.json").get(null, handleJsonResponse);
 }
