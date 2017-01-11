@@ -105,6 +105,7 @@ text {
   margin: 10px 0px 0px 10px;
   animation: animateleft 0.4s; /*used to avoid a bug in chrome where the close button disappears when the parent element is animated*/
   text-align: center;
+  user-select: none;
 }
 
 .loader {
