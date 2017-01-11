@@ -64,7 +64,7 @@ function handleJsonResponse(arr){
   lineGenerator = d3.line();
   //collapse the tree to only show the currentRoot and it's children
   currentRoot.children.forEach(collapseAllChildren);
-  window.addEventListener("resize", init2);
+  window.addEventListener("resize", init);
   init();
 }
 
@@ -110,11 +110,6 @@ function initHtmlElements(){
 
   rightSVG.on("mouseup", stopLongPressTimer)
           .on("click", closePopUpMenu);
-}
-
-function init2(){
-  console.log("resize");
-  init();
 }
 
 function init(){
@@ -470,7 +465,6 @@ function updatePath(){
 }
 
 function updateLeftSVGNodes(nodes){
-    console.log("update");
   //recalculate how to wrap the text to fit inside it's container
   nodes.selectAll("text")
        .each(fillWithText);
@@ -485,7 +479,6 @@ function updateLeftSVGNodes(nodes){
 }
 
 function createNewLeftSVGNodes(newNodes){
-    console.log("create new");
   //calculate text wrapping for all new nodes
   newNodes.insert("text")
           .attr("text-anchor","middle")
@@ -499,7 +492,6 @@ function createNewLeftSVGNodes(newNodes){
 }
 
 function animateLeftSVGNodes(nodes, newNodes){
-    console.log("animate");
   nodes.transition()
        .duration(animationDuration)
        .attr("transform", getLeftNodeTransform);
@@ -511,8 +503,7 @@ function animateLeftSVGNodes(nodes, newNodes){
   newNodes.attr("opacity", 0).transition()
           .duration(animationDuration)
           .delay(animationDuration)
-          .attr("opacity", 1)
-          .on("interrupt", function(){console.log("interrupted")});
+          .attr("opacity", 1);
 }
 
 function updateLeftSVGLinks(path){

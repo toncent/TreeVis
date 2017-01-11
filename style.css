@@ -99,6 +99,11 @@ text {
   padding: 10px;
   position: fixed;
   cursor: pointer;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  margin: 10px 0px 0px 10px;
+  text-align: center;
 }
 
 .loader {

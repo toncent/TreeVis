@@ -3,7 +3,6 @@ function openSideNav(){
 	document.getElementById("openSideNav").style.display = "none";
 	//path has to be updated after displaying the left container 
 	//because otherwise text wrapping will not be done correctly
-    console.log("opensidenav")
 	updatePath();
 }
 
