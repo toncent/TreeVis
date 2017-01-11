@@ -13,10 +13,14 @@
   </div>
   <div class="w3-row full-height" id="main-container" style="display:none">
     <div class="w3-white w3-rightbar w3-border-blue half-screen hide-one-pane w3-animate-left full-height" id="leftContainer">
-      <a onclick="closeSideNav()" class="hide-two-pane close-btn w3-blue">&times;</a>
+      <div class="close-btn hide-two-pane w3-blue" onclick="closeSideNav()">
+        <span>&times;</span>
+      </div>
     </div>
     <div class="w3-rest full-height" id="rightContainer">
-      <span class="w3-opennav hide-two-pane close-btn w3-blue" id="openSideNav" onclick="openSideNav()">&#9776;</span>
+      <div class="close-btn hide-two-pane w3-blue" onclick="openSideNav()">
+        <span id="openSideNav">&#9776;</span>
+      </div>
       <script src="tree.js"></script>
     </div>
   </div>
