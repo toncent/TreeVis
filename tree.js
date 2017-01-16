@@ -304,7 +304,8 @@ function updateRightSvgNodes(nodes){
       .attr("transform", function(d){
         return "translate(" + (d.x) + "," + (d.y) + ")"}
       )
-      .attr("class", getNodeClass);
+      .attr("class", getNodeClass)
+      .attr("opacity", 1);
 
   //update the sizes of nodes in case the screen size has changed
   nodes.selectAll("circle")
@@ -532,7 +533,10 @@ function animateLeftSVGNodes(nodes, newNodes){
   newNodes.attr("opacity", 0).transition()
           .duration(animationDuration)
           .delay(animationDuration)
-          .attr("opacity", 1);
+          .attr("opacity", function(d){
+            if (d.left.greyedOut) return 0.3;
+            return 1;
+          });
 }
 
 function updateLeftSVGLinks(path){
