@@ -15,7 +15,7 @@ var rightSVG, leftSVG;
 var rightSvgLinkGroup;
 var rightSvgNodeGroup;
 
-var root, currentRoot;
+var root, currentRoot, currentPath = [];
 var tree;
 
 var lineHeight = 1.3; //em
@@ -50,8 +50,8 @@ function fetchDataAndInitialize(){
   if (treeVisGraph && treeVisPatient) {
     d3.json("http://10.200.1.75:8012/tree?hops=15&name=" + treeVisGraph).get(null, handleJsonResponse);
   } else {
-    d3.json("http://10.200.1.75:8012/tree?hops=15&name=graphdiarrhea1").get(null, handleJsonResponse);
-    //window.location.href = "login.html";  
+    //d3.json("http://10.200.1.75:8012/tree?hops=15&name=graphdiarrhea1").get(null, handleJsonResponse);
+    window.location.href = "login.html";  
   }
   //d3.json("exampleTree.json").get(null, handleJsonResponse);
 }
@@ -74,6 +74,7 @@ function setupD3Hierarchy(arr){
   root = d3.hierarchy(arr[0])
   
   currentRoot = root;
+  currentPath.push(root);
   currentRoot.x0 = width/2;
   currentRoot.y0 = height/2;
   currentRoot.descendants().forEach(initializeNode);
@@ -238,12 +239,18 @@ function fillWithText(node){
 //otherwise makes the given node the current root and returns true
 function jumpToNode(node){
   if (node == currentRoot) return false;
-  collapseSingleNode(currentRoot);
-  if (node.childrenBackup) {
-      node.children = node.childrenBackup;
+
+  //in case we are jumping forward in the currentPath 
+  //we need to expand all children along the way
+  for (var i=0; i < currentPath.length; i++){
+    if (currentPath[i].childrenBackup) currentPath[i].children = currentPath[i].childrenBackup;
+    if (currentPath[i] == node) break;
   }
   currentRoot = node;
-  currentRoot.children.forEach(collapseAllChildren);
+
+  //in case we jumped backwards in the currentPath 
+  //we need to collapse all children of the nodes children (unless it's a leaf)
+  if(currentRoot.children) currentRoot.children.forEach(collapseAllChildren);
   return true;
 }
 
@@ -391,6 +398,10 @@ function nodeClicked(node){
     if (node.childrenBackup) {
       node.children = node.childrenBackup;
     }
+    //set the clicked node as the new endpoint on the 
+    //left side so greyed out nodes disappear
+    var nodeIsInPath = currentPath.find(function(n){return n == node});
+    if(!nodeIsInPath) currentPath = root.path(node);
   }
   updateTree(currentRoot);
   updatePath();
@@ -431,9 +442,15 @@ function updatePath(){
   calculatingRightSide = false;
   //create the path from the original root to the currently selected node
   var path = root.path(currentRoot);//.reverse();
-
+  //make nodes greyed out that go beyond the path from root to currentRoot
+  currentPath.forEach(function(node){
+    node.left.greyedOut = true;
+  });
+  path.forEach(function(node){
+    node.left.greyedOut = false;
+  });
   //get all the nodes in the svg and compare them with the new path
-  var nodes = leftSvgNodeGroup.selectAll("g").data(path, function(d){return d.data.properties.id});
+  var nodes = leftSvgNodeGroup.selectAll("g").data(currentPath, function(d){return d.data.properties.id});
   
   //remove nodes that aren't in the path anymore
   var nodesRemoved = !nodes.exit().empty();
@@ -459,10 +476,10 @@ function updatePath(){
   newNodes.on("click", leftNodeClicked);
   
   //update the lines between nodes 
-  updateLeftSVGLinks(path);
+  updateLeftSVGLinks(currentPath);
 
   //enable scrolling if not enough nodes fit on the screen
-  toggleScrolling(path, newNodes, nodesRemoved);
+  toggleScrolling(currentPath, newNodes, nodesRemoved);
 }
 
 function updateLeftSVGNodes(nodes){
@@ -477,6 +494,17 @@ function updateLeftSVGNodes(nodes){
         .duration(animationDuration)
         .attr("width", leftNodeWidth)
         .attr("height", getLeftNodeHeight);
+  
+  //grey out nodes where necessary
+  leftSvgNodeGroup.selectAll("g")
+                  //.transition()
+                  //.duration(animationDuration)
+                  .attr("opacity", function(node){
+                    if (node.left.greyedOut) {
+                      return 0.3;
+                    }
+                    return 1;
+                  });
 }
 
 function createNewLeftSVGNodes(newNodes){
