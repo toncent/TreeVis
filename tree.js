@@ -30,7 +30,7 @@ var longPressHappened = false;
 
 var popUpMenu, popUpMenuRadius, arcGenerator, smallArcGenerator, donutChart, menuNodeSVG, menuNode;
 
-var treeVisPatient, treeVisGraph;
+var treeVisPatientId, treeVisGraphId, treeVisUser, treeArr, patientArr, medicalActions;
 
 //############################
 // Initialization
@@ -45,23 +45,54 @@ fetchDataAndInitialize();
 //############################
 function fetchDataAndInitialize(){
   //load example tree data from json file
-  treeVisGraph = getCookie("treeVisGraph");
-  treeVisPatient = getCookie("treeVisPatient");
-  if (treeVisGraph && treeVisPatient) {
-    d3.json("http://10.200.1.75:8012/tree?hops=15&name=" + treeVisGraph).get(null, handleJsonResponse);
+  treeVisGraphId = getCookie("treeVisGraph");
+  treeVisPatientId = getCookie("treeVisPatient");
+  treeVisUser = getCookie("treeVisUser");
+  if (treeVisGraphId) {
+    d3.json("http://10.200.1.75:8012/tree?hops=15&name=" + treeVisGraphId).get(null, onTreeDataReturned);
   } else {
-    //d3.json("http://10.200.1.75:8012/tree?hops=15&name=graphdiarrhea1").get(null, handleJsonResponse);
+    //d3.json("http://10.200.1.75:8012/tree?hops=15&name=graphdiarrhea1").get(null, onTreeDataReturned);
     window.location.href = "login.html";  
   }
-  //d3.json("exampleTree.json").get(null, handleJsonResponse);
+  //d3.json("exampleTree.json").get(null, onTreeDataReturned);
 }
 
-function handleJsonResponse(arr){
+function onTreeDataReturned(arr){
+  if(!arr) {
+    //TODO real error handling
+    console.log("error fetching tree data. returned data was " + arr);
+  } else {
+    treeArr = arr;
+  }
+  if (treeVisPatientId) {
+    d3.json("http://10.200.1.75:8016/patients/id/" + treeVisPatientId).get(null, onPatientDataReturned);
+  } else {
+    onAllDataReturned();
+  }
+}
+
+function onPatientDataReturned(arr){
+  if(!arr) {
+    //TODO real error handling
+    console.log("error fetching patient data. returned data was " + arr);
+  } else {
+    patientArr = arr;
+  }
+  onAllDataReturned();
+}
+
+function onAllDataReturned(){
   d3.select("#loader-container").remove();
   d3.select("#main-container").style("display", "block");
   initHtmlElements();
-  setupD3Tree();
-  setupD3Hierarchy(arr);
+
+  //extract relevant data from patientArray
+  if (patientArr) {
+    getPatientData();
+  }
+  // create a new d3 tree
+  tree = d3.tree();
+  setupD3Hierarchy(treeArr);
   lineGenerator = d3.line();
   //collapse the tree to only show the currentRoot and it's children
   currentRoot.children.forEach(collapseAllChildren);
@@ -80,14 +111,26 @@ function setupD3Hierarchy(arr){
   currentRoot.descendants().forEach(initializeNode);
 }
 
-function initializeNode(node){
-  node.left = {};
-  node.right = {};
+function getPatientData(){
+  var data = patientArr.medicalActions;
+  medicalActions = [];
+  for (var i = 0; i < data.length; i++) {
+    if (data[i].action.graphId == treeVisGraphId) {
+      medicalActions.push(data[i]);
+    }
+  }
 }
 
-function setupD3Tree(){
-  // create a new d3 tree
-  tree = d3.tree();
+function initializeNode(node){
+  node.left = {};
+  if (medicalActions) {
+    for (var i = 0; i < medicalActions.length; i++) {
+      if(medicalActions[i].action.name == node.data.name){
+        node.data.state = medicalActions[i].state.toLowerCase();
+        break;
+      }
+    };
+  };
 }
 
 function initHtmlElements(){
@@ -353,7 +396,7 @@ function createNewRightSvgNodes(newNodes){
 }
 
 function getCircleClass(node){
-  return node.data.status || "";
+  return node.data.state || "";
 }
 
 function addMouseListeners(node){
@@ -627,7 +670,7 @@ function getLeftNodeTransform(node, i){
 }
 
 function getRectClass(node){
-  var strokeClass = node.data.status ? node.data.status + " " : "";
+  var strokeClass = node.data.state ? node.data.state + " " : "";
   return strokeClass + getNodeClass(node);
 }
 
@@ -774,7 +817,7 @@ function onPopUpMenuClick(element){
   d3.event.stopPropagation();
   var circle = menuNodeSVG.select("circle");
   var menuButton = d3.select(this);
-  menuNode.data.status = menuButton.attr("class")
+  menuNode.data.state = menuButton.attr("class")
   menuButton.transition()
             .duration(animationDuration)
             .on("end", closePopUpMenu)

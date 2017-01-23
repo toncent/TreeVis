@@ -1,4 +1,8 @@
+//===========================================================
 //code taken from http://www.w3schools.com/js/js_cookies.asp
+//===========================================================
+
+//sets a cookie with cname as its name and cvalue as its content that expires after exdays
 function setCookie(cname, cvalue, exdays) {
     var d = new Date();
     d.setTime(d.getTime() + (exdays*24*60*60*1000));
@@ -6,7 +10,7 @@ function setCookie(cname, cvalue, exdays) {
     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
 
-//returns the content of the cookie with the provided name (taken from w3schools)
+//returns the content of the cookie with the provided name
 function getCookie(cname) {
   var name = cname + "=";
   var decodedCookie = decodeURIComponent(document.cookie);
