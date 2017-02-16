@@ -1,3 +1,18 @@
+:root{
+  --highlight-color: #6FFF0D ;
+  --highlight-color-light: #6FFF0D ;
+  --content-color: #383838 ;
+  --content-color-light: #575757 ;  
+  --node-one: #00FFB3 ;
+  --node-two: #002DFF ;
+  --node-three: #7D00E8 ;
+  --node-four: #FF00FA ;
+  --node-one-light: #E8DB6A ;
+  --node-two-light: #FFC259 ;
+  --node-three-light: #E8825E ;
+  --node-four-light: #FF6DB1 ;
+}
+
 text {
   pointer-events: none;
 }
@@ -34,19 +49,19 @@ rect {
 }
 
 .diagnosis {
-  fill : rgb(255,255,180);
+  fill : var(--node-one);
 }
 
 .symptom {
-  fill : rgb(255,180,255);
+  fill : var(--node-two);
 }
 
 .examination {
-  fill : rgb(255,180,180);
+  fill : var(--node-three);
 }
 
 .therapy {
-  fill : rgb(180,255,255);
+  fill : var(--node-four);
 }
 
 path {

@@ -49,10 +49,12 @@ function fetchDataAndInitialize(){
   treeVisPatientId = getCookie("treeVisPatient");
   treeVisUser = getCookie("treeVisUser");
   if (treeVisGraphId) {
-    d3.json("http://10.200.1.75:8012/tree?hops=15&name=" + treeVisGraphId).get(null, onTreeDataReturned);
+    var url = "http://10.200.1.75:8012/tree?hops=15&name=" + treeVisGraphId;
+    console.log("fetching tree from "+url)
+    d3.json(url).get(null, onTreeDataReturned);
   } else {
-    //d3.json("http://10.200.1.75:8012/tree?hops=15&name=graphdiarrhea1").get(null, onTreeDataReturned);
-    window.location.href = "login.html";  
+    d3.json("http://10.200.1.75:8012/tree?hops=15&name=graphdiarrhea1").get(null, onTreeDataReturned);
+    //window.location.href = "login.html";
   }
   //d3.json("exampleTree.json").get(null, onTreeDataReturned);
 }
@@ -180,10 +182,6 @@ function init(){
   //left half initialization
   leftNodeWidth = width*0.75;
   updatePath();
-}
-
-function calculateTextSize(d){
-  d.fontSize = (2*rightNodeRadius / this.getComputedTextLength())*0.9;
 }
 
 //creates a line using d3.line() according to the links source and target
@@ -399,6 +397,11 @@ function getCircleClass(node){
   return node.data.state || "";
 }
 
+function calculateTextSize(d){
+  if(calculatingRightSide) d.fontSize = (2*rightNodeRadius / this.getComputedTextLength())*0.9;
+  else d.fontSize = (leftNodeWidth / this.getComputedTextLength())*0.9;
+}
+
 function addMouseListeners(node){
   //give all new nodes a click listener
   element = d3.select(this);
@@ -562,6 +565,10 @@ function createNewLeftSVGNodes(newNodes){
           .attr("width", leftNodeWidth)
           .attr("height", getLeftNodeHeight)
           .attr("class", getRectClass);
+}
+
+function calculateLeftTextSize(d){
+  d.fontSize = (2*rightNodeRadius / this.getComputedTextLength())*0.9;
 }
 
 function animateLeftSVGNodes(nodes, newNodes){
