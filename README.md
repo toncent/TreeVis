@@ -72,8 +72,67 @@
     *  Rückwärtsanimation: Äußere Knoten verschwinden -> angetippter mittlerer Knoten bewegt sich nach außen -> Vorgängerknoten und dessen andere Nachfolger erscheinen
       *  Ziel: Nutzer soll intuitiv verstehen, dass er einen Schritt zurück gemacht hat
 
-# Fragen an Ärzte
- * Ist es besser auf der Linken seite das neueste ganz oben anzuzeigen oder es von oben nach unten anzuordnen und das neueste in die Mitte des Bildschirms zu scrollen
+# Fragebogen
+* Overall, I am satisfied  with how easy it is to use this system.
+* It is simple to use this system.
+* I can effectively  complete my work using this system.
+* I am able to complete my work quickly using this system.
+* I am able to efficiently  complete my work using this system.
+* I feel comfortable  using this system.
+* It was easy to learn to use this system.
+* I believe I became productive quickly using this system.
+* The system gives error messages that clearly tell me how  to fix problems.
+* Whenever I make a mistake using the system, I recover easily and quickly.
+* The  information  (such  as  on-line  help,  on-screen  messages,  and  other
+documentation) provided with this system  is clear.
+* It is easy to find  the information  I need.
+* The information  provided with the system  is easy to understand.
+* The information  is effective  in helping me complete my work.
+* The organization  of information  on the system screens is clear.
+
+* Das Layout wirkt zu gedrängt. 
+* Das Layout ist gut zu erfassen.
+* Das Layout erscheint angenehm gegliedert. 
+* Die Seite erscheint zu uneinheitlich.
+* Auf der Seite passt alles zusammen.
+* Die Seitengestaltung ist uninteressant. 
+* Das Layout ist originell. 
+* Die Gestaltung wirkt einfallslos. 
+* Das Layout wirkt dynamisch. 
+* Das Layout ist angenehm vielseitig. 
+* Die farbliche Gesamtgestaltung wirkt attraktiv. 
+* Die Farben passen nicht zueinander. 
+* Der Farbeinsatz ist nicht gelungen.
+* Die Farben haben eine angenehme Wirkung. 
+* Das Layout ist professionell. 
+* Das Layout ist nicht zeitgemäß. 
+* Die Seite erscheint mit Sorgfalt gemacht. 
+* Das Layout wirkt konzeptlos.
+
+
+* Ich kann mir sehr gut vorstellen, das System regelmäßig zu nutzen.
+* Ich empfinde das System als unnötig komplex.
+* Ich empfinde das System als einfach zu nutzen.
+* Ich denke, dass ich technischen Support brauchen würde, um das System zu nutzen.
+* Ich finde, dass die verschiedenen Funktionen des Systems gut integriert sind.
+* Ich finde, dass es im System zu viele Inkonsistenzen gibt.
+* Ich kann mir vorstellen, dass die meisten Leute das System schnell zu beherrschen lernen.
+* Ich empfinde die Bedienung als sehr umständlich.
+* Ich habe mich bei der Nutzung des Systems sehr sicher gefühlt.
+* Ich musste eine Menge Dinge lernen, bevor ich mit dem System arbeiten konnte.
+
+Die Software...
+* ist unkompliziert zu bedienen.
+* bietet alle Funktionen, die anfallenden Aufgaben effizient zu bewältigen.
+* bietet gute Möglichkeiten, sich häufig wiederholende Bearbeitungsvorgänge zu automatisieren.
+* erfordert keine überflüssigen Eingaben.
+* ist gut auf die Anforderungen der Arbeit zugeschnitten.
+* bietet einen guten Überblick über ihr Funktionsangebot.
+* verwendet gut verständliche Begriffe, Bezeichnungen, Abkürzungen oder Symbole in Masken und Menüs.
+* liefert in zureichendem Masse Informationen darüber, welche Eingaben zulässig oder nötig sind.
+* bietet auf Verlangen situationsspezifische Erklärungen, die konkret weiterhelfen.
+* bietet von sich aus situationsspezifische Erklärungen, die konkret weiterhelfen.
+* http://www.ergo-online.de/site.aspx?url=html/software/verfahren_zur_beurteilung_der/fragebogen_isonorm_online.htm
 
 # Stuff
  * Testen auf Telefon: (treeVis.html) wo platziert man den leftcontainer/rightcontainer anzeigen button am besten?
