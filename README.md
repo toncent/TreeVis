@@ -39,8 +39,7 @@
     *  Es soll vermieden werden, dass Überschriftstexte (Beschriftung der Kreise rechts und Überschrift der Rechtecke links) ihre beinhaltenden Elemente überschreiten. Dazu macht man sich die Tatsache zu Nutze, dass die Breite eines Textes proportional zu seiner Schriftgröße wächst
     *  Die Schriftgröße wird zunächst auf 1em gesetzt und es wird berechnet, wie breit der text ist
     *  jetzt kann die Breite des Textes mit der Breite des ihn umgebenden Elements verglichen werden und die Textbreite durch eine einfache skalierung der Textgröße auf das gewünschte Maß gebracht werden
-      *  Rechte Seite: 90% der Breite des Kreises, aber maximal 1,3em
-      *  Linke Seite: TODO
+      * Textgröße: 90% der Breite des Elements, aber maximal 1,3em
 
  * text wrapping (wrapText())
     *  der ausführliche Text, der in den Knoten auf der linken Seite angezeigt wird passt meist nicht auf eine Zeile, bzw. wäre dann unlesbar. Daher muss entschieden werden, an welchen Stellen Zeilenumbrüche stattfinden sollen
@@ -49,8 +48,12 @@
     *  sind noch Wörter übrig, dann wird eine neue Zeile erstellt und der Vorgang wiederholt, bis alle Wörter eingefügt wurden
 
 # Designentscheidungen
+ * Einsatz von D3 zur Visualisierung der Daten
+ 
  * (30/08/2016) Nachdem ich anfangs mit einem Canvas gearbeitet habe wechsle ich nun dazu den Baum durch ein SVG-Element anzuzeigen. Ich glaube, dass sich damit Animationen leichter realisieren lassen und dass nur wenige Knoten auf einmal auf dem Bildschirm zu sehen sein werden, wodurch der Performance Nachteil gegenüber einem Canvas nicht ins Gewicht fällt
-
+ 
+ * Kreisförmige Anordnung von Knoten mit hilfe von Polarkoordinaten.
+ 
  * (28.9.2016) Zoom und Drag Events auf dem großen Haupt-Baum werden ignoriert, weil sie keine Erleichterung in der Benutzung bewirken, sondern eher das Gegenteil. Meist wird der Baum nur verschoben, wenn man eigentlich einen Knoten antippen wollte und Zoomen ist überflüssig, weil die Knoten von Anfang an groß genug dargestellt werden.
 
  * (07.11.2016) Knoten erhalten ein left-objekt, in dem relevante daten für die anzeige auf der linken seite gespeichert werden.
@@ -134,6 +137,11 @@ Die Software...
 * bietet von sich aus situationsspezifische Erklärungen, die konkret weiterhelfen.
 * http://www.ergo-online.de/site.aspx?url=html/software/verfahren_zur_beurteilung_der/fragebogen_isonorm_online.htm
 
+# Background
+* Erklärung von Polarkoordinaten
+* Übliche Begriffe bei Arbeit mit Bäumen/Graphen (Knoten, Wurzel, Kante ...)
+* D3
+
 # Stuff
  * Testen auf Telefon: (treeVis.html) wo platziert man den leftcontainer/rightcontainer anzeigen button am besten?
 
@@ -145,7 +153,4 @@ Die Software...
 #TODO
  * Nachladen von Knoten, wenn Ende erreicht wird
  * Senden von eingetragenen Ergebnissen
- * Text size für Überschriften auf der linken Seite
-
-#Generelle Fragen
- * müssen Quellenangaben gemacht werden für functions, die durch Internetbeispiele inspiriert sind (text wrapping, text size)?
+ * Bild mit Vergleich zwischen kreisförmiger Anordnung von Knoten vs horizontal
