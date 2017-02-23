@@ -49,11 +49,11 @@ function fetchDataAndInitialize(){
   treeVisPatientId = getCookie("treeVisPatient");
   treeVisUser = getCookie("treeVisUser");
   if (treeVisGraphId) {
-    var url = "http://10.200.1.75:8012/tree?hops=15&name=" + treeVisGraphId;
+    var url = "http://10.200.1.75:8012/tree?hops=50&name=" + treeVisGraphId;
     console.log("fetching tree from "+url)
     d3.json(url).get(null, onTreeDataReturned);
   } else {
-    d3.json("http://10.200.1.75:8012/tree?hops=15&name=graphdiarrhea1").get(null, onTreeDataReturned);
+    d3.json("http://10.200.1.75:8012/tree?hops=15&name=graphdyspepsia1").get(null, onTreeDataReturned);
     //window.location.href = "login.html";
   }
   //d3.json("exampleTree.json").get(null, onTreeDataReturned);
@@ -105,7 +105,7 @@ function onAllDataReturned(){
 function setupD3Hierarchy(arr){
   // create a d3 hierarchy from the data collected from exampleTree.json
   root = d3.hierarchy(arr[0])
-  
+  console.log(root.descendants().length)
   currentRoot = root;
   currentPath.push(root);
   currentRoot.x0 = width/2;

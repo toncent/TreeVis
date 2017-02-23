@@ -104,7 +104,7 @@ documentation) provided with this system  is clear.
 * Das Layout wirkt dynamisch. 
 * Das Layout ist angenehm vielseitig. 
 * Die farbliche Gesamtgestaltung wirkt attraktiv. 
-* Die Farben passen nicht zueinander. 
+* Die Farben passen nicht zueinander.
 * Der Farbeinsatz ist nicht gelungen.
 * Die Farben haben eine angenehme Wirkung. 
 * Das Layout ist professionell. 
@@ -137,6 +137,34 @@ Die Software...
 * bietet von sich aus situationsspezifische Erklärungen, die konkret weiterhelfen.
 * http://www.ergo-online.de/site.aspx?url=html/software/verfahren_zur_beurteilung_der/fragebogen_isonorm_online.htm
 
+# Fragebogen diesmal wirklich
+* 4 Antwortmöglichkeiten 
+  * stimme nicht zu
+  * stimme eher nicht zu
+  * stimme eher zu
+  * stimme zu
+* screenshot + kurze erklärung + link
+* eigener branch für fragebogenversion ohne login etc
+
+## Fragen
+* Berufsgruppe abfragen
+* Das Layout wirkt zu gedrängt.
+* Das Layout erscheint angenehm gegliedert. 
+* Das Layout ist originell.
+* Die Farben passen nicht zueinander.
+* Das Layout wirkt professionell.
+* Die Farben haben eine angenehme Wirkung.
+* Ich empfinde das System als einfach zu nutzen.
+* Ich empfinde die Bedienung als intuitiv.
+* Ich kann mir vorstellen, dass das System die Arbeit im genannten Kontext erleichtert.
+* Die verwendeten Symbole sind verständlich.
+* Die Software liefert ausreichend Informationen darüber, welche Eingaben möglich sind.
+* It is easy to find  the information  I need.
+* (Freitext) Welche Anwendungsmöglichkeiten sehen sie für diese Software?
+
+
+
+
 # Background
 * Erklärung von Polarkoordinaten
 * Übliche Begriffe bei Arbeit mit Bäumen/Graphen (Knoten, Wurzel, Kante ...)
@@ -149,6 +177,7 @@ Die Software...
  * w3css
  * d3
  * getCookie und setCookie in cookies.js kopiert von http://www.w3schools.com/js/js_cookies.asp
+ * fragebögen
 
 #TODO
  * Nachladen von Knoten, wenn Ende erreicht wird
