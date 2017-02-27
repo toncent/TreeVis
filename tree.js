@@ -49,11 +49,11 @@ function fetchDataAndInitialize(){
   treeVisPatientId = getCookie("treeVisPatient");
   treeVisUser = getCookie("treeVisUser");
   if (treeVisGraphId) {
-    var url = "http://10.200.1.75:8012/tree?hops=50&name=" + treeVisGraphId;
+    var url = "http://localhost:8012/tree?hops=50&name=" + treeVisGraphId;
     console.log("fetching tree from "+url)
     d3.json(url).get(null, onTreeDataReturned);
   } else {
-    d3.json("http://10.200.1.75:8012/tree?hops=15&name=graphdyspepsia1").get(null, onTreeDataReturned);
+    d3.json("http://localhost:8012/tree?hops=15&name=graphdyspepsia1").get(null, onTreeDataReturned);
     //window.location.href = "login.html";
   }
   //d3.json("exampleTree.json").get(null, onTreeDataReturned);
