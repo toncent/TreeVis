@@ -1,6 +1,9 @@
-\BOOKMARK [0][-]{chapter.1}{Introduction}{}% 1
-\BOOKMARK [0][-]{chapter.2}{Background}{}% 2
-\BOOKMARK [0][-]{chapter.3}{Contribution}{}% 3
-\BOOKMARK [0][-]{chapter.4}{Results}{}% 4
-\BOOKMARK [0][-]{chapter.5}{State of the Art}{}% 5
-\BOOKMARK [0][-]{chapter.6}{Conclusion}{}% 6
+\BOOKMARK [0][-]{chapter.1}{Background}{}% 1
+\BOOKMARK [1][-]{section.1.1}{Javascript Framework}{chapter.1}% 2
+\BOOKMARK [0][-]{chapter.2}{Contribution}{}% 3
+\BOOKMARK [1][-]{section.2.1}{Baumlayout}{chapter.2}% 4
+\BOOKMARK [2][-]{subsection.2.1.1}{Linear vs. Radial}{section.2.1}% 5
+\BOOKMARK [2][-]{subsection.2.1.2}{Polarkoordinaten}{section.2.1}% 6
+\BOOKMARK [1][-]{section.2.2}{Reduzieren der angezeigten Knoten}{chapter.2}% 7
+\BOOKMARK [2][-]{subsection.2.2.1}{Relevante und irrelevante Knoten}{section.2.2}% 8
+\BOOKMARK [2][-]{subsection.2.2.2}{Dynamische Aktualisierung}{section.2.2}% 9
