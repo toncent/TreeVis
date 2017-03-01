@@ -5,7 +5,7 @@ Most important chapter of the thesis. Describes what the author contributes as r
 
 \section{Baumlayout}
 
-\subsection{Linear vs. Radial}
+\subsection{Linear vs. Radial}\label{sec:radial}
 Aufgrund des begrenzten Platzes, der auf mobilen Geräten typischerweise zur Verfügung steht, war früh in der Entwicklung zu entscheiden, wie Baumstrukturen möglichst platzsparend anzuordnen sind, ohne Übersichtlichkeit einzubüßen. Betrachtet wurden dabei speziell die allgemein übliche Darstellung (linear) gegenüber einer kreisförmigen (radialen) Anordnung.\\
 \begin{figure}
 	\centering
@@ -43,7 +43,7 @@ Das bedeutet, dass ab einem Abstand zur Wurzel von mehr als $\frac{a}{6}$ im rad
 Aufgrund dieser Erkenntnis und der Tatsache, dass beide Darstellungsformen gute Übersichtlichkeit aufweisen, fiel die Wahl letztendlich auf das radiale Layout.
 
 \subsection{Polarkoordinaten}
-D3 bietet zur Berechnung einer sinnvollen Knotenanordnung von Bäumen die Funktion $d3.tree()$ an, welche unter Verwendung des Reingold-Tilford Algorithmus \todo{quelle} allen Knoten eines Baumes x- und y-Koordinaten jeweils im Bereich von 0 bis 1 zuordnet. Es liegt dann in der Hand des Programmierers, diese sinnvoll zu interpretieren. Um die Knoten, wie in Abbildung \ref{abb:radialbaum} gezeigt in konzentrischen Kreisen anzuordnen, eignen sich Polarkoordinaten ausgezeichnet. Die y-Koordinate wird als Radius $\rho$, die x-Koordinate als Polarwinkel $\varphi$ in Radiant interpretiert. \todo{bild}
+D3 bietet zur Berechnung einer sinnvollen Knotenanordnung von Bäumen die Funktion $d3.tree()$ an, welche unter Verwendung des Reingold-Tilford Algorithmus \todo{quelle} allen Knoten eines Baumes x- und y-Koordinaten jeweils im Bereich von 0 bis 1 zuordnet. Es liegt dann in der Hand des Programmierers, diese sinnvoll zu interpretieren. Um die Knoten, wie in Abbildung \ref{abb:radialbaum} gezeigt in konzentrischen Kreisen anzuordnen, eignen sich Polarkoordinaten ausgezeichnet. Einem Vorschlag aus der Dokumentation von D3 folgend \todo{quelle} wird die y-Koordinate als Radius $\rho$, die x-Koordinate als Polarwinkel $\varphi$ in Radiant interpretiert. \todo{bild}
 \begin{align*}
 &\rho = y\\
 &\varphi = 2 \cdot \pi \cdot x
@@ -58,7 +58,11 @@ Bei dieser Umrechnung wird allerdings noch nicht berücksichtigt, dass die gegeb
 &x_{screen} = \rho \cdot \cos (\varphi) \cdot w + \frac{w}{2} \label{eq:polkarthx}\\
 &y_{screen} = \rho \cdot \sin (\varphi) \cdot h + \frac{h}{2}.\label{eq:polkarthy}
 \end{align}
-Nachdem mit dem radialen Layout eine erste Maßnahme zum Einsparen von Platz ergriffen wurde, stellt sich als nächstes die Frage, wie die Übersichtlichkeit weiter verbessert werden kann.
+
+
+\section{Anzeigen der Knoten mit D3}
+\todo{Beschreibung der JSON struktur, wie sie umgewandelt wird in eine hierarchy. diskussion über canvas vs svg}\\
+Nachdem mit dem radialen Layout (Kapitel \ref{sec:radial}) eine erste Maßnahme zum Einsparen von Platz ergriffen wurde, stellt sich als nächstes die Frage, wie die Übersichtlichkeit weiter verbessert werden kann.
 
 
 \section{Reduzieren der angezeigten Knoten}
@@ -67,11 +71,21 @@ Nachdem mit dem radialen Layout eine erste Maßnahme zum Einsparen von Platz erg
 Da Knoten auf dem Bildschirm später Informationen in Form von Text beinhalten sollen, ist es abzusehen, dass jeder einzelne Knoten mehr Platz einnehmen wird, als z.B. in Abbildung \ref{abb:radialbaum} gezeigt ist. Es bietet sich an, immer nur aktuell relevante Knoten ein- und irrelevante auszublenden. Das erfordert je nach Eingabe dynamische Änderungen an der Anzeige der Baumstruktur (Kapitel \ref{sec:dynamische_aktual}). Zunächst muss jedoch entschieden werden, welche Knoten aktuell relevant oder irrelevant sind. 
 \begin{figure}
 	\centering
-	\includegraphics{../screenshots/entscheidungsbaum_bsp.PNG}
+	\includegraphics[width=\linewidth]{../screenshots/entscheidungsbaum_bsp.PNG}
 	\caption{Ein simpler Entscheidungsbaum}
 	\label{abb:entsch_baum_bsp}
 \end{figure}
-In Abbildung \ref{abb:entsch_baum_bsp} ist beispielhaft ein Entscheidungsbaum zu sehen, der in stark vereinfachter Form die Entscheidungsfindung zur Frage ob ein Regenschirm nötig ist darstellt. Innere Knoten sind als Ellipsen dargestellt und Blätter, welche endgültige Ergebnisse repräsentieren, sind rechteckig. Die Beschriftung der Knoten zeigt an, welche Aussage oder Frage sie symbolisieren. Die beiden Stellen, an denen Entscheidungen getroffen werden müssen, sind mit $A$ und $B$ markiert. In der Situation $A$ gilt es zu entscheiden, ob es regnet oder nicht regnet. Um diese Entscheidung treffen zu können, ist nicht relevant, ob es zu einem späteren Zeitpunkt regnen wird oder nicht und welche Ergebnisse sich daraus ableiten lassen. Bei $B$ wiederum sind vorherige Entscheidungsmöglichkeiten nicht von Interesse, ebenso wie die Folgen davon, ob es regnen wird oder nicht. Man kann sagen, dass bei jeder Verzweigung nur die zur Verfügung stehenden Alternativen relevant sind und angezeigt werden müssen. Da es jedoch nicht nur darum geht, so viel Platz wie möglich zu sparen, sondern auch darum, eine übersichtliche und intuitiv Verständliche Darstellung zu finden ist es hilfreich, außerdem noch den Knoten, von dem die Verzweigung ausgeht zu zeigen. Bei $A$ also den Knoten ``Regenschirm nötig'', bei $B$ ``Es regnet nicht''. Auf diese Art ist es leichter die Orientierung zu behalten, selbst wenn ein Großteil des Baumes nicht sichtbar ist.
+In Abbildung \ref{abb:entsch_baum_bsp} ist beispielhaft ein Entscheidungsbaum zu sehen, der in stark vereinfachter Form die Entscheidungsfindung zur Frage, ob ein Regenschirm nötig ist, zeigt. Innere Knoten sind als Ellipsen dargestellt und Blätter, welche endgültige Ergebnisse repräsentieren, sind rechteckig. Die Beschriftung der Knoten zeigt an, welche Aussage oder Frage sie symbolisieren. Die beiden Stellen, an denen Entscheidungen getroffen werden müssen, sind mit $A$ und $B$ markiert. In Situation $A$ gilt es zu entscheiden, ob es regnet oder nicht. Um diese Entscheidung treffen zu können, ist nicht relevant, ob es zu einem späteren Zeitpunkt regnen wird oder nicht und welche Ergebnisse sich daraus ableiten lassen. Bei $B$ wiederum sind vorherige Entscheidungsmöglichkeiten nicht von Interesse, ebenso wie die Folgen davon, ob es regnen wird oder nicht. Man kann sagen, dass bei jeder Verzweigung nur die zur Verfügung stehenden Alternativen relevant sind und angezeigt werden müssen. Da es jedoch nicht nur darum geht, so viel Platz wie möglich zu sparen, sondern auch darum, eine übersichtliche und intuitiv Verständliche Darstellung zu finden ist es hilfreich, außerdem noch den Knoten, von dem die Verzweigung ausgeht zu zeigen. Bei $A$ also den Knoten \glqq Regenschirm nötig\grqq , bei $B$ \glqq Es regnet nicht\grqq . Auf diese Art ist es leichter die Orientierung zu behalten, selbst wenn ein Großteil des Baumes nicht sichtbar ist.
 
-\subsection{Dynamische Aktualisierung}\label{sec:dynamische_aktual}
-
+\subsection{Navigieren durch den Baum}\label{sec:dynamische_aktual}
+Durch das Ausblenden vieler der Knoten muss nun eine Möglichkeit geschaffen werden, von einer Entscheidung zur nächsten zu navigieren, wobei immer wieder irrelevante Knoten aus- und relevant gewordene eingeblendet werden. Das wird möglich gemacht, indem die Baumanzeige auf Berührung hin dynamisch aktualisiert wird. Es gilt dabei, dass der Knoten, von dem die aktuelle Verzweigung ausgeht, in der Mitte des Bildschirms zu sehen ist und die nachfolgenden Entscheidungsmöglichkeiten im Kreis darum herum angeordnet werden.
+\begin{figure}
+	\centering
+	\includegraphics[width=\linewidth]{../screenshots/baumnavigation.PNG}
+	\caption{Beispiel zur Baumnavigation}
+	\label{abb:baumnavigation}
+\end{figure}
+ Abbildung \ref{abb:baumnavigation} zeigt die Reaktion des Baumes auf verschiedene Nutzereingaben. Auf der linken Seite ist der Ausgangszustand zu sehen und rechts der Nachfolgezustand. Links ist der mittlere Knoten mit \glqq Regenschirm nötig?\grqq\ beschriftet und dessen Nachfolger mit \glqq Es regnet nicht\grqq\ sowie \glqq es regnet\grqq. Rechts sieht man \glqq Es regnet nicht\grqq\ in der Mitte, \glqq Es wird nicht regnen\grqq\ und \glqq Es wird regnen\grqq\ als Folgeknoten. Die mit $A$ und $B$ beschrifteten Pfeile symbolisieren Reaktionen auf Eingaben, die im Folgenden genauer beschrieben werden. \\Durch Antippen eines der äußeren Knoten wird dieser in die Mitte verschoben und es zeigen sich dessen Nachfolger. Tippt man zum Beispiel in Abbildung \ref{abb:baumnavigation} links \glqq No red flags\grqq\ an, dann wird dieser, wie Pfeil $A$ zeigt, zum mittleren Knoten, die anderen verschwinden und es erscheinen die neuen Nachfolgeknoten. Möchte man einen Schritt zurück machen, kann der Mittelknoten berührt werden und man wird wieder zur links gezeigten Situation geleitet (illustriert durch Pfeil $B$).\\
+ Um diese Aktualisierungen der Anzeige zu erreichen macht man Gebrauch von $hierarchies$ und $selections$ in D3 und besonders von deren Funktionen $data()$, $enter()$ und $exit()$ (siehe Kapitel \ref{sec:framework}). Wird ein Knoten angetippt,
+ 
+ \section{Einsatz von Animationen}\label{sec:animation}

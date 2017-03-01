@@ -3,14 +3,14 @@
   --highlight-color-light: #6FFF0D ;
   --content-color: #383838 ;
   --content-color-light: #575757 ;  
-  --node-one: #00FFB3 ;
-  --node-two: #002DFF ;
-  --node-three: #7D00E8 ;
-  --node-four: #FF00FA ;
-  --node-one-light: #E8DB6A ;
-  --node-two-light: #FFC259 ;
-  --node-three-light: #E8825E ;
-  --node-four-light: #FF6DB1 ;
+  --node-one: #3CFFC8 ;
+  --node-two: #254DFF ;
+  --node-three: #8A21E8 ;
+  --node-four: #FF28FE ;
+  --node-one-light: #9EFFE9 ;
+  --node-two-light: #6183FF ;
+  --node-three-light: #A05AE8 ;
+  --node-four-light: #FD7CFF ;
 }
 
 text {
@@ -49,19 +49,19 @@ rect {
 }
 
 .diagnosis {
-  fill : var(--node-one);
+  fill : var(--node-one-light);
 }
 
 .symptom {
-  fill : var(--node-two);
+  fill : var(--node-two-light);
 }
 
 .examination {
-  fill : var(--node-three);
+  fill : var(--node-three-light);
 }
 
 .therapy {
-  fill : var(--node-four);
+  fill : var(--node-four-light);
 }
 
 path {
@@ -148,12 +148,11 @@ text {
 .flex-container{
   display:flex;
   flex-direction: column;
+  overflow: auto;
 }
 
 .flex-list{
-  display:flex;
   overflow: auto;
-  flex-direction: column;
   margin-bottom: 25px !important;
   margin-top: 10px !important;
 }

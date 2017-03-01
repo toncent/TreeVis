@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9 64-bit) (preloaded format=pdflatex 2017.2.19)  25 FEB 2017 20:08
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9 64-bit) (preloaded format=pdflatex 2017.2.19)  1 MAR 2017 10:02
 entering extended mode
 **./thesis.tex
 (thesis.tex
@@ -844,11 +844,29 @@ Package babel Info: Redefining ngerman shorthand "~
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <52> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 1.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <17.28> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 4.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 3.
+Package babel Info: Redefining ngerman shorthand "|
+(babel)             in language  on input line 3.
+Package babel Info: Redefining ngerman shorthand "~
+(babel)             in language  on input line 3.
 Package babel Info: Redefining ngerman shorthand "|
 (babel)             in language  on input line 4.
 Package babel Info: Redefining ngerman shorthand "~
 (babel)             in language  on input line 4.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <14.4> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 6.
+Package babel Info: Redefining ngerman shorthand "|
+(babel)             in language  on input line 6.
+Package babel Info: Redefining ngerman shorthand "~
+(babel)             in language  on input line 6.
+Package babel Info: Redefining ngerman shorthand "|
+(babel)             in language  on input line 8.
+Package babel Info: Redefining ngerman shorthand "~
+(babel)             in language  on input line 8.
+Package babel Info: Redefining ngerman shorthand "|
+(babel)             in language  on input line 10.
+Package babel Info: Redefining ngerman shorthand "~
+(babel)             in language  on input line 10.
 ) (sections/contribution.tex
 Package babel Info: Redefining ngerman shorthand "|
 (babel)             in language  on input line 1.
@@ -892,13 +910,11 @@ Package babel Info: Redefining ngerman shorthand "|
 (babel)             in language  on input line 6.
 Package babel Info: Redefining ngerman shorthand "~
 (babel)             in language  on input line 6.
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <14.4> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 8.
 Package babel Info: Redefining ngerman shorthand "|
 (babel)             in language  on input line 8.
 Package babel Info: Redefining ngerman shorthand "~
 (babel)             in language  on input line 8.
-<../screenshots/lineargraphexample.PNG, id=50, 451.6875pt x 451.6875pt>
+<../screenshots/lineargraphexample.PNG, id=75, 451.6875pt x 451.6875pt>
 File: ../screenshots/lineargraphexample.PNG Graphic file (type png)
 
 <use ../screenshots/lineargraphexample.PNG>
@@ -936,7 +952,7 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <9> not available
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 17.
 
-<../screenshots/radialgraphexample.PNG, id=52, 451.6875pt x 451.6875pt>
+<../screenshots/radialgraphexample.PNG, id=77, 451.6875pt x 451.6875pt>
 File: ../screenshots/radialgraphexample.PNG Graphic file (type png)
 
 <use ../screenshots/radialgraphexample.PNG>
@@ -985,39 +1001,70 @@ Package babel Info: Redefining ngerman shorthand "~
 [4 <../screenshots/lineargraphexample.PNG> <../screenshots/radialgraphexample.P
 NG>]
 Package babel Info: Redefining ngerman shorthand "|
-(babel)             in language  on input line 64.
+(babel)             in language  on input line 63.
 Package babel Info: Redefining ngerman shorthand "~
-(babel)             in language  on input line 64.
+(babel)             in language  on input line 63.
 Package babel Info: Redefining ngerman shorthand "|
-(babel)             in language  on input line 66.
+(babel)             in language  on input line 68.
 Package babel Info: Redefining ngerman shorthand "~
-(babel)             in language  on input line 66.
+(babel)             in language  on input line 68.
+Package babel Info: Redefining ngerman shorthand "|
+(babel)             in language  on input line 70.
+Package babel Info: Redefining ngerman shorthand "~
+(babel)             in language  on input line 70.
 
-<../screenshots/entscheidungsbaum_bsp.PNG, id=79, 466.74374pt x 240.14719pt>
+<../screenshots/entscheidungsbaum_bsp.PNG, id=105, 466.74374pt x 240.14719pt>
 File: ../screenshots/entscheidungsbaum_bsp.PNG Graphic file (type png)
 
 <use ../screenshots/entscheidungsbaum_bsp.PNG>
 Package pdftex.def Info: ../screenshots/entscheidungsbaum_bsp.PNG used on input
- line 70.
-(pdftex.def)             Requested size: 466.7426pt x 240.14658pt.
+ line 74.
+(pdftex.def)             Requested size: 453.82137pt x 233.50677pt.
+Package babel Info: Redefining ngerman shorthand "|
+(babel)             in language  on input line 79.
+Package babel Info: Redefining ngerman shorthand "~
+(babel)             in language  on input line 79.
+Package babel Info: Redefining ngerman shorthand "|
+(babel)             in language  on input line 79.
+Package babel Info: Redefining ngerman shorthand "~
+(babel)             in language  on input line 79.
+ [5]
+Package babel Info: Redefining ngerman shorthand "|
+(babel)             in language  on input line 80.
+Package babel Info: Redefining ngerman shorthand "~
+(babel)             in language  on input line 80.
 
-Overfull \hbox (12.92123pt too wide) in paragraph at lines 70--71
- [][] 
- []
+<../screenshots/baumnavigation.PNG, id=113, 677.53125pt x 665.48625pt>
+File: ../screenshots/baumnavigation.PNG Graphic file (type png)
+
+<use ../screenshots/baumnavigation.PNG>
+Package pdftex.def Info: ../screenshots/baumnavigation.PNG used on input line 8
+4.
+(pdftex.def)             Requested size: 453.82137pt x 445.77193pt.
+Package babel Info: Redefining ngerman shorthand "|
+(babel)             in language  on input line 90.
+Package babel Info: Redefining ngerman shorthand "~
+(babel)             in language  on input line 90.
+Package babel Info: Redefining ngerman shorthand "|
+(babel)             in language  on input line 90.
+Package babel Info: Redefining ngerman shorthand "~
+(babel)             in language  on input line 90.
+ [6 <../screenshots/entscheidungsbaum_bsp.PNG>]
+Underfull \vbox (badness 1297) has occurred while \output is active []
 
 Package babel Info: Redefining ngerman shorthand "|
-(babel)             in language  on input line 75.
+(babel)             in language  on input line 91.
 Package babel Info: Redefining ngerman shorthand "~
-(babel)             in language  on input line 75.
+(babel)             in language  on input line 91.
 Package babel Info: Redefining ngerman shorthand "|
-(babel)             in language  on input line 75.
+(babel)             in language  on input line 91.
 Package babel Info: Redefining ngerman shorthand "~
-(babel)             in language  on input line 75.
-[5]
+(babel)             in language  on input line 91.
+ [7 <../screenshots/baumnavigation.PNG>]
 Package babel Info: Redefining ngerman shorthand "|
-(babel)             in language  on input line 76.
+(babel)             in language  on input line 91.
 Package babel Info: Redefining ngerman shorthand "~
-(babel)             in language  on input line 76.
+(babel)             in language  on input line 91.
 )
 Package atveryend Info: Empty hook `BeforeClearDocument' on input line 36.
 Package babel Info: Redefining ngerman shorthand "|
@@ -1028,13 +1075,13 @@ Package babel Info: Redefining ngerman shorthand "|
 (babel)             in language  on input line 36.
 Package babel Info: Redefining ngerman shorthand "~
 (babel)             in language  on input line 36.
- [6 <../screenshots/entscheidungsbaum_bsp.PNG>]
+ [8]
 Package atveryend Info: Empty hook `AfterLastShipout' on input line 36.
  (thesis.aux)
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 36.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 36.
 Package rerunfilecheck Info: File `thesis.out' has not changed.
-(rerunfilecheck)             Checksum: 33BE02793762C777B049F67BD0DCF08E;604.
+(rerunfilecheck)             Checksum: AE3EE93D4B44F9A8D3BE6B9F262B1923;986.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 36.
  )
 (\end occurred inside a group at level 1)
@@ -1042,13 +1089,13 @@ Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 36.
 ### simple group (level 1) entered at line 1061 ({)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 11297 strings out of 493335
- 181599 string characters out of 3139254
- 313639 words of memory out of 3000000
- 14614 multiletter control sequences out of 15000+200000
+ 11321 strings out of 493335
+ 182016 string characters out of 3139254
+ 314639 words of memory out of 3000000
+ 14628 multiletter control sequences out of 15000+200000
  32618 words of font info for 69 fonts, out of 3000000 for 9000
  1142 hyphenation exceptions out of 8191
- 40i,13n,46p,1539b,7423s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 40i,13n,46p,1542b,7455s stack positions out of 5000i,500n,10000p,200000b,50000s
 {C:/Program Files/MiKTeX 2.9/fonts/enc/dvips/fontname/8r.enc}<C
 :/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Progra
 m Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Program Files/M
@@ -1056,9 +1103,9 @@ iKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Program Files/MiKTeX 2.
 9/fonts/type1/urw/symbol/usyr.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/urw/
 times/utmb8a.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/urw/times/utmr8a.pfb>
 <C:/Program Files/MiKTeX 2.9/fonts/type1/urw/times/utmri8a.pfb>
-Output written on thesis.pdf (6 pages, 207426 bytes).
+Output written on thesis.pdf (8 pages, 262234 bytes).
 PDF statistics:
- 123 PDF objects out of 1000 (max. 8388607)
- 21 named destinations out of 1000 (max. 500000)
- 88 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 166 PDF objects out of 1000 (max. 8388607)
+ 30 named destinations out of 1000 (max. 500000)
+ 141 words of extra memory for PDF output out of 10000 (max. 10000000)
 
