@@ -201,19 +201,32 @@ function getNodeClass(node){
 }
 
 function insertNodeName(node){
-  var textElement = d3.select(this),
-      text = node.data.name;
+  var textElement = d3.select(this);
 
       //remove all previous text
   textElement.text(null);
   
   //add the caption to the text element
   textElement.attr("font-size", "1em")
-             .text(node.data.name)
+             .text(node.data.name.trim())
              .attr("dominant-baseline", "central")
              .attr("font-style", "italic")
              .each(calculateTextSize)
              .attr("font-size", function(d) {return Math.min(1.3, d.fontSize) + "em"});
+  if(node.fontSize < 1) shortenNodeName.bind(this)(node);
+}
+
+//removes letters from the nodename unil it can fit in its text element with text size 1em
+function shortenNodeName(node){
+  var textElement = d3.select(this);
+  textElement.attr("font-size", "1em");
+  var text = node.data.name;
+  while(node.fontSize < 1){
+    text = text.slice(0,text.length - 1);
+    textElement.text(text).each(calculateTextSize);
+  }
+    text = text.slice(0,text.length - 3).trim();
+    textElement.text(text + "...");
 }
 
 //inserts line breaks into the text so it fits inside the corresponding rectangle
