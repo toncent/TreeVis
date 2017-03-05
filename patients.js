@@ -17,7 +17,7 @@ function init(){
 }
 
 function loadData(){
-  d3.json("http://localhost:8016/graphs/all-trees").get(null, fillGraphList);
+  d3.json("http://ec2-52-59-228-237.eu-central-1.compute.amazonaws.com:8016/graphs/all-trees").get(null, fillGraphList);
 }
 
 function fillGraphList(arr){

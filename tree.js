@@ -49,11 +49,11 @@ function fetchDataAndInitialize(){
   treeVisPatientId = getCookie("treeVisPatient");
   treeVisUser = getCookie("treeVisUser");
   if (treeVisGraphId) {
-    var url = "http://localhost:8012/tree?hops=50&name=" + treeVisGraphId;
+    var url = "http://ec2-52-59-228-237.eu-central-1.compute.amazonaws.com:8012/tree?hops=50&name=" + treeVisGraphId;
     console.log("fetching tree from "+url)
     d3.json(url).get(null, onTreeDataReturned);
   } else {
-    d3.json("http://localhost:8012/tree?hops=15&name=graphdyspepsia1").get(null, onTreeDataReturned);
+    d3.json("http://ec2-52-59-228-237.eu-central-1.compute.amazonaws.com:8012/tree?hops=15&name=graphdyspepsia1").get(null, onTreeDataReturned);
     //window.location.href = "login.html";
   }
   //d3.json("exampleTree.json").get(null, onTreeDataReturned);
@@ -66,11 +66,7 @@ function onTreeDataReturned(arr){
   } else {
     treeArr = arr;
   }
-  if (treeVisPatientId) {
-    d3.json("http://10.200.1.75:8016/patients/id/" + treeVisPatientId).get(null, onPatientDataReturned);
-  } else {
-    onAllDataReturned();
-  }
+  onAllDataReturned();
 }
 
 function onPatientDataReturned(arr){
