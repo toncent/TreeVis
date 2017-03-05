@@ -1,15 +1,23 @@
 \BOOKMARK [0][-]{chapter.1}{Background}{}% 1
 \BOOKMARK [1][-]{section.1.1}{JSON}{chapter.1}% 2
-\BOOKMARK [1][-]{section.1.2}{Javascript Framework D3}{chapter.1}% 3
-\BOOKMARK [2][-]{subsection.1.2.1}{Hierarchies}{section.1.2}% 4
-\BOOKMARK [2][-]{subsection.1.2.2}{Selections}{section.1.2}% 5
-\BOOKMARK [1][-]{section.1.3}{SVG}{chapter.1}% 6
-\BOOKMARK [0][-]{chapter.2}{Contribution}{}% 7
-\BOOKMARK [1][-]{section.2.1}{Baumlayout}{chapter.2}% 8
-\BOOKMARK [2][-]{subsection.2.1.1}{Linear vs. Radial}{section.2.1}% 9
-\BOOKMARK [2][-]{subsection.2.1.2}{Polarkoordinaten}{section.2.1}% 10
-\BOOKMARK [1][-]{section.2.2}{Anzeigen der Knoten mit D3}{chapter.2}% 11
-\BOOKMARK [1][-]{section.2.3}{Reduzieren der angezeigten Knoten}{chapter.2}% 12
-\BOOKMARK [2][-]{subsection.2.3.1}{Relevante und irrelevante Knoten}{section.2.3}% 13
-\BOOKMARK [2][-]{subsection.2.3.2}{Navigieren durch den Baum}{section.2.3}% 14
-\BOOKMARK [1][-]{section.2.4}{Einsatz von Animationen}{chapter.2}% 15
+\BOOKMARK [1][-]{section.1.2}{D3}{chapter.1}% 3
+\BOOKMARK [2][-]{subsection.1.2.1}{Selections}{section.1.2}% 4
+\BOOKMARK [2][-]{subsection.1.2.2}{Hierarchies}{section.1.2}% 5
+\BOOKMARK [2][-]{subsection.1.2.3}{Shapes}{section.1.2}% 6
+\BOOKMARK [2][-]{subsection.1.2.4}{Transitions}{section.1.2}% 7
+\BOOKMARK [1][-]{section.1.3}{SVG}{chapter.1}% 8
+\BOOKMARK [0][-]{chapter.2}{Contribution}{}% 9
+\BOOKMARK [1][-]{section.2.1}{Baumlayout}{chapter.2}% 10
+\BOOKMARK [2][-]{subsection.2.1.1}{Linear vs. Radial}{section.2.1}% 11
+\BOOKMARK [2][-]{subsection.2.1.2}{Polarkoordinaten}{section.2.1}% 12
+\BOOKMARK [1][-]{section.2.2}{Anzeigen der Knoten mit D3}{chapter.2}% 13
+\BOOKMARK [2][-]{subsection.2.2.1}{Canvas versus SVG}{section.2.2}% 14
+\BOOKMARK [2][-]{subsection.2.2.2}{Datenstruktur}{section.2.2}% 15
+\BOOKMARK [2][-]{subsection.2.2.3}{Anzeige auf SVG}{section.2.2}% 16
+\BOOKMARK [2][-]{subsection.2.2.4}{Berechnen der Schriftgr\366\337e}{section.2.2}% 17
+\BOOKMARK [1][-]{section.2.3}{Reduzieren der angezeigten Knoten}{chapter.2}% 18
+\BOOKMARK [1][-]{section.2.4}{Navigieren durch den Baum}{chapter.2}% 19
+\BOOKMARK [2][-]{subsection.2.4.1}{Dynamische Aktualisierung}{section.2.4}% 20
+\BOOKMARK [1][-]{section.2.5}{Einsatz von Animationen}{chapter.2}% 21
+\BOOKMARK [2][-]{subsection.2.5.1}{Verbesserung von Orientierung und \334bersichtlichkeit}{section.2.5}% 22
+\BOOKMARK [2][-]{subsection.2.5.2}{Interaktivit\344t}{section.2.5}% 23

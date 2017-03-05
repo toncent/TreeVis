@@ -140,9 +140,14 @@ Die Software...
 # Background
 * Erklärung von Polarkoordinaten
 * Übliche Begriffe bei Arbeit mit Bäumen/Graphen (Knoten, Wurzel, Kante ...)
-* Begriffe Entscheidungsbaum einführen
+* Begriff Entscheidungsbaum einführen
 * D3
+  * hierarchy
+  * selection
+  * interpolator
+  * transition
 * Umwandeln von Entscheidungsgraph in Baum
+* svg, canvas
 
 # Stuff
  * Testen auf Telefon: (treeVis.html) wo platziert man den leftcontainer/rightcontainer anzeigen button am besten?
