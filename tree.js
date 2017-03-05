@@ -101,7 +101,6 @@ function onAllDataReturned(){
 function setupD3Hierarchy(arr){
   // create a d3 hierarchy from the data collected from exampleTree.json
   root = d3.hierarchy(arr[0])
-  console.log(root.descendants().length)
   currentRoot = root;
   currentPath.push(root);
   currentRoot.x0 = width/2;
