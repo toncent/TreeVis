@@ -3,14 +3,14 @@
   --highlight-color-light: #6FFF0D ;
   --content-color: #383838 ;
   --content-color-light: #575757 ;  
-  --node-one: #00FFB3 ;
-  --node-two: #002DFF ;
-  --node-three: #7D00E8 ;
-  --node-four: #FF00FA ;
-  --node-one-light: #E8DB6A ;
-  --node-two-light: #FFC259 ;
-  --node-three-light: #E8825E ;
-  --node-four-light: #FF6DB1 ;
+  --node-one: #8effdf ;
+  --node-two: #91a5ff ;
+  --node-three: #c07aff ;
+  --node-four: #ff70fe ;
+  --node-one-light: #9EFFE9 ;
+  --node-two-light: #6183FF ;
+  --node-three-light: #A05AE8 ;
+  --node-four-light: #FD7CFF ;
 }
 
 text {
