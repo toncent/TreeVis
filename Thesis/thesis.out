@@ -1,23 +1,31 @@
 \BOOKMARK [0][-]{chapter.1}{Background}{}% 1
-\BOOKMARK [1][-]{section.1.1}{JSON}{chapter.1}% 2
-\BOOKMARK [1][-]{section.1.2}{D3}{chapter.1}% 3
-\BOOKMARK [2][-]{subsection.1.2.1}{Selections}{section.1.2}% 4
-\BOOKMARK [2][-]{subsection.1.2.2}{Hierarchies}{section.1.2}% 5
-\BOOKMARK [2][-]{subsection.1.2.3}{Shapes}{section.1.2}% 6
-\BOOKMARK [2][-]{subsection.1.2.4}{Transitions}{section.1.2}% 7
-\BOOKMARK [1][-]{section.1.3}{SVG}{chapter.1}% 8
-\BOOKMARK [0][-]{chapter.2}{Contribution}{}% 9
-\BOOKMARK [1][-]{section.2.1}{Baumlayout}{chapter.2}% 10
-\BOOKMARK [2][-]{subsection.2.1.1}{Linear vs. Radial}{section.2.1}% 11
-\BOOKMARK [2][-]{subsection.2.1.2}{Polarkoordinaten}{section.2.1}% 12
-\BOOKMARK [1][-]{section.2.2}{Anzeigen der Knoten mit D3}{chapter.2}% 13
-\BOOKMARK [2][-]{subsection.2.2.1}{Canvas versus SVG}{section.2.2}% 14
-\BOOKMARK [2][-]{subsection.2.2.2}{Datenstruktur}{section.2.2}% 15
-\BOOKMARK [2][-]{subsection.2.2.3}{Anzeige auf SVG}{section.2.2}% 16
-\BOOKMARK [2][-]{subsection.2.2.4}{Berechnen der Schriftgr\366\337e}{section.2.2}% 17
-\BOOKMARK [1][-]{section.2.3}{Reduzieren der angezeigten Knoten}{chapter.2}% 18
-\BOOKMARK [1][-]{section.2.4}{Navigieren durch den Baum}{chapter.2}% 19
-\BOOKMARK [2][-]{subsection.2.4.1}{Dynamische Aktualisierung}{section.2.4}% 20
-\BOOKMARK [1][-]{section.2.5}{Einsatz von Animationen}{chapter.2}% 21
-\BOOKMARK [2][-]{subsection.2.5.1}{Verbesserung von Orientierung und \334bersichtlichkeit}{section.2.5}% 22
-\BOOKMARK [2][-]{subsection.2.5.2}{Interaktivit\344t}{section.2.5}% 23
+\BOOKMARK [1][-]{section.1.1}{Graphen}{chapter.1}% 2
+\BOOKMARK [2][-]{subsection.1.1.1}{B\344ume}{section.1.1}% 3
+\BOOKMARK [2][-]{subsection.1.1.2}{Entscheidungsb\344ume}{section.1.1}% 4
+\BOOKMARK [1][-]{section.1.2}{SVG}{chapter.1}% 5
+\BOOKMARK [2][-]{subsection.1.2.1}{Geometrische Grundformen}{section.1.2}% 6
+\BOOKMARK [2][-]{subsection.1.2.2}{Text}{section.1.2}% 7
+\BOOKMARK [2][-]{subsection.1.2.3}{Path}{section.1.2}% 8
+\BOOKMARK [2][-]{subsection.1.2.4}{Gruppieren von Elementen}{section.1.2}% 9
+\BOOKMARK [1][-]{section.1.3}{D3}{chapter.1}% 10
+\BOOKMARK [2][-]{subsection.1.3.1}{Anwendungsbeispiele}{section.1.3}% 11
+\BOOKMARK [2][-]{subsection.1.3.2}{Module}{section.1.3}% 12
+\BOOKMARK [1][-]{section.1.4}{Struktur der verwendeten Daten}{chapter.1}% 13
+\BOOKMARK [0][-]{chapter.2}{Contribution}{}% 14
+\BOOKMARK [1][-]{section.2.1}{Baumlayout}{chapter.2}% 15
+\BOOKMARK [2][-]{subsection.2.1.1}{Linear vs. Radial}{section.2.1}% 16
+\BOOKMARK [2][-]{subsection.2.1.2}{Polarkoordinaten}{section.2.1}% 17
+\BOOKMARK [1][-]{section.2.2}{Reduzieren der angezeigten Knoten}{chapter.2}% 18
+\BOOKMARK [1][-]{section.2.3}{Baumdarstellung mit D3}{chapter.2}% 19
+\BOOKMARK [2][-]{subsection.2.3.1}{Vergleich zwischen Canvas und SVG}{section.2.3}% 20
+\BOOKMARK [2][-]{subsection.2.3.2}{Datenstruktur}{section.2.3}% 21
+\BOOKMARK [2][-]{subsection.2.3.3}{Erzeugung eines SVG}{section.2.3}% 22
+\BOOKMARK [2][-]{subsection.2.3.4}{Pr\344parieren der Knotendaten f\374r die Darstellung}{section.2.3}% 23
+\BOOKMARK [2][-]{subsection.2.3.5}{Erzeugen der Knotendarstellung}{section.2.3}% 24
+\BOOKMARK [2][-]{subsection.2.3.6}{Erzeugen der Kantendarstellung}{section.2.3}% 25
+\BOOKMARK [1][-]{section.2.4}{Navigation im Baum}{chapter.2}% 26
+\BOOKMARK [2][-]{subsection.2.4.1}{Dynamische Aktualisierung}{section.2.4}% 27
+\BOOKMARK [1][-]{section.2.5}{Eingabemen\374}{chapter.2}% 28
+\BOOKMARK [1][-]{section.2.6}{Einsatz von Animationen}{chapter.2}% 29
+\BOOKMARK [2][-]{subsection.2.6.1}{Interaktivit\344t}{section.2.6}% 30
+\BOOKMARK [2][-]{subsection.2.6.2}{Verbesserung von Orientierung und \334bersichtlichkeit}{section.2.6}% 31

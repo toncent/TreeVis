@@ -385,12 +385,7 @@ function createNewRightSvgNodes(newNodes){
 
   //set the new nodes positions to their parents starting position
   newNodes.attr("transform", function(d){
-              if(d.parent){
-                d.x0 = d.parent.x;
-                d.y0 = d.parent.y;
-                return "translate(" + (d.x0) + "," + (d.y0) + ")";
-              }
-              else return "translate(" + (d.x) + "," + (d.y) + ")";
+              return "translate(" + (width/2) + "," + (height/2) + ")";
             })
           .attr("class", getNodeClass)
           //animate the node to fade in and go to it's correct position (starting from the parents previous position)
