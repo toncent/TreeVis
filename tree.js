@@ -203,7 +203,7 @@ function getNodeClass(node){
 function insertNodeName(node){
   var textElement = d3.select(this);
 
-      //remove all previous text
+  //remove all previous text
   textElement.text(null);
   
   //add the caption to the text element
@@ -216,17 +216,42 @@ function insertNodeName(node){
   if(node.fontSize < 1) shortenNodeName.bind(this)(node);
 }
 
-//removes letters from the nodename unil it can fit in its text element with text size 1em
+//splits node name into two lines. If second line is still too long removes letters 
+//from the nodename unil it can fit in its text element with text size 1em
 function shortenNodeName(node){
   var textElement = d3.select(this);
-  textElement.attr("font-size", "1em");
+  textElement.attr("font-size", "1em").text(null);
   var text = node.data.name;
-  while(node.fontSize < 1){
-    text = text.slice(0,text.length - 1);
-    textElement.text(text).each(calculateTextSize);
+  var wordList = text.split(/\s/).reverse();
+  var currentLine = [];
+  var lineNumber = 1;
+  var currentTspan = textElement.append("tspan")
+                                .attr("x", 0)
+                                .attr("y", 0)
+                                .attr("dy", 0);
+  while (currentWord = wordList.pop()){
+    currentLine.push(currentWord);
+    currentTspan.text(currentLine.join(" "));
+    if (currentTspan.node().getComputedTextLength() > rightNodeRadius*2*0.9) {
+      if(lineNumber == 2){
+        //cut off remaining text
+        currentLine.pop();
+        //currentLine.push("...");
+        var shortenedText = currentLine.join(" ").slice(0,text.length - 3).trim() + "...";
+        currentTspan.text(shortenedText);
+        break;
+      } else {
+        //insert a new line
+        currentLine.pop();
+        currentTspan.text(currentLine.join(" "));
+        currentLine = [currentWord];
+        currentTspan = textElement.append("tspan").attr("x", 0).attr("y", 0).attr("dy", (lineNumber++*lineHeight) + "em");
+        currentTspan.text(currentLine.join(" "));
+      }
+    }
   }
-    text = text.slice(0,text.length - 3).trim();
-    textElement.text(text + "...");
+  //update dominant baseline setting for two lines of text
+  textElement.attr("dominant-baseline", "auto");
 }
 
 //inserts line breaks into the text so it fits inside the corresponding rectangle
@@ -761,10 +786,10 @@ function onLongPress(node){
 function initPopUpMenu(){
   closePopUpMenu();
   popUpMenuRadius = rightNodeRadius;
-  arcGenerator = d3.arc().innerRadius(popUpMenuRadius + 2.5).outerRadius(popUpMenuRadius*1.8).padAngle(0.1);
+  arcGenerator = d3.arc().innerRadius(popUpMenuRadius + 2.5).outerRadius(popUpMenuRadius*1.8);//.padAngle(0.1);
   //calculate the angles for a pie/donut chart with two equal sections
   donutChart = d3.pie()
-                 .value(function(d){return d.value})
+                 .value(function(d){return d.value}).padAngle(0.1)
                  ([{value:1, cssClass:"positive"}, {value:1, cssClass:"negative"}, {value:1, cssClass:"unknown"}]);
 }
 
@@ -776,7 +801,7 @@ function openPopUpMenu(x,y){
   popUpMenu.attr("transform", "translate(" + x + "," + y + ")");
 
   //add a path for each section of the donut chart to the popUpMenu and animate it
-  smallArcGenerator = d3.arc().innerRadius(popUpMenuRadius).outerRadius(popUpMenuRadius+1).padAngle(0.1);
+  smallArcGenerator = d3.arc().innerRadius(popUpMenuRadius).outerRadius(popUpMenuRadius+1);
   popUpMenu.selectAll("path")
            .data(donutChart)
            .enter()

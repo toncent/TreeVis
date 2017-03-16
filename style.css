@@ -50,18 +50,22 @@ rect {
 
 .diagnosis {
   fill : var(--node-one-light);
+  stroke : var(--node-one-light);
 }
 
 .symptom {
   fill : var(--node-two-light);
+  stroke : var(--node-one-light);
 }
 
 .examination {
   fill : var(--node-three-light);
+  stroke : var(--node-one-light);
 }
 
 .therapy {
   fill : var(--node-four-light);
+  stroke : var(--node-one-light);
 }
 
 path {
@@ -79,8 +83,6 @@ path {
 }
 
 .unknown{
-  stroke: rgba(222,222,0,1);
-  stroke-width : 5;
 }
 
 path.negative {
@@ -104,6 +106,7 @@ path.unknown {
 text {
   stroke : #000;
   fill : #000;
+  stroke-width: 0.5px;
 }
 
 .full-height{
@@ -173,7 +176,6 @@ text {
 /* Portrait */
 @media screen and (max-width: 999px) {
    .half-screen {
-      width: 50%;
       width: 100%;
    }
    .hide-two-pane{
