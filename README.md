@@ -137,21 +137,6 @@ Die Software...
 * bietet von sich aus situationsspezifische Erklärungen, die konkret weiterhelfen.
 * http://www.ergo-online.de/site.aspx?url=html/software/verfahren_zur_beurteilung_der/fragebogen_isonorm_online.htm
 
-# Background
-* Erklärung von Polarkoordinaten
-* Übliche Begriffe bei Arbeit mit Bäumen/Graphen (Knoten, Wurzel, Kante ...)
-* Begriff Entscheidungsbaum einführen
-* D3
-  * hierarchy
-  * selection
-  * interpolator
-  * transition
-* Umwandeln von Entscheidungsgraph in Baum
-* svg, canvas
-
-# Stuff
- * Testen auf Telefon: (treeVis.html) wo platziert man den leftcontainer/rightcontainer anzeigen button am besten?
-
 #Quellen
  * w3css
  * d3
@@ -160,4 +145,3 @@ Die Software...
 #TODO
  * Nachladen von Knoten, wenn Ende erreicht wird
  * Senden von eingetragenen Ergebnissen
- * Bild mit Vergleich zwischen kreisförmiger Anordnung von Knoten vs horizontal

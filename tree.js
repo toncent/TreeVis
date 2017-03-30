@@ -32,6 +32,8 @@ var popUpMenu, popUpMenuRadius, arcGenerator, smallArcGenerator, donutChart, men
 
 var treeVisPatientId, treeVisGraphId, treeVisUser, treeArr, patientArr, medicalActions;
 
+var loadingNode;
+
 //############################
 // Initialization
 //############################
@@ -49,11 +51,12 @@ function fetchDataAndInitialize(){
   treeVisPatientId = getCookie("treeVisPatient");
   treeVisUser = getCookie("treeVisUser");
   if (treeVisGraphId) {
-    var url = "http://10.200.1.75:8012/tree?hops=15&name=" + treeVisGraphId;
+    var url = "http://10.200.1.75:8012/tree?hops=10&name=" + treeVisGraphId;
     console.log("fetching tree from "+url)
     d3.json(url).get(null, onTreeDataReturned);
   } else {
-    d3.json("http://10.200.1.75:8012/tree?hops=15&name=graphdiarrhea1").get(null, onTreeDataReturned);
+    treeVisGraphId = "graphdiarrhea1";
+    d3.json("http://10.200.1.75:8012/tree?hops=10&name=graphdiarrhea1").get(null, onTreeDataReturned);
     //window.location.href = "login.html";
   }
   //d3.json("exampleTree.json").get(null, onTreeDataReturned);
@@ -172,7 +175,7 @@ function init(){
   //right half initialization
   rightNodeWidth = width*0.30;
   rightNodeHeight = height*0.25;
-  rightNodeRadius = Math.min(width, height)*.1;
+  rightNodeRadius = Math.min(width, height)*.12;
   treeWidth = width/2 - 2*rightNodeRadius;
   treeHeight = height/2 - 2*rightNodeRadius;
 
@@ -213,12 +216,12 @@ function insertNodeName(node){
              .attr("font-style", "italic")
              .each(calculateTextSize)
              .attr("font-size", function(d) {return Math.min(1.3, d.fontSize) + "em"});
-  if(node.fontSize < 1) shortenNodeName.bind(this)(node);
+  if(node.fontSize < 1) wrapNodeName.bind(this)(node);
 }
 
 //splits node name into two lines. If second line is still too long removes letters 
 //from the nodename unil it can fit in its text element with text size 1em
-function shortenNodeName(node){
+function wrapNodeName(node){
   var textElement = d3.select(this);
   textElement.attr("font-size", "1em").text(null);
   var text = node.data.name;
@@ -331,6 +334,64 @@ function jumpToNode(node){
   //we need to collapse all children of the nodes children (unless it's a leaf)
   if(currentRoot.children) currentRoot.children.forEach(collapseAllChildren);
   return true;
+}
+
+//checks if there are more nodes to be loaded. 
+//New nodes are loaded from server if the out-degree
+//of the node or it's children is greater than 0 but 
+//they have no children attached.
+function loadMoreNodes(node){
+  var url;
+  var children = node.children || node.childrenBackup;
+  if (!children && node.data.properties["out-degree"] > 0) {
+    //new nodes have to be fetched from server
+    url = "http://10.200.1.75:8012/tree?hops=5&name=" + treeVisGraphId+"&rootNodeId=" + node.data.properties.id;
+    node.children = [];
+    loadingNode = node;
+  }
+
+  if (url) {
+    //add dummynodes to the node that display "loading"
+    addDummyNodes(node);
+    console.log("fetching tree from "+url)
+    d3.json(url).get(null, onMoreNodesLoaded);
+  };
+}
+
+function addDummyNodes(node){
+  for (var i = 0; i < node.data.properties["out-degree"]; i++) {
+    node.children.push({
+      data:{
+        name: "loading...", 
+        parent: node.data.name, 
+        type: "symptom", 
+        properties:{id: "dummy-"+i}
+      },
+      parent : node,
+      depth : node.depth + 1
+    });
+  }
+}
+
+function onMoreNodesLoaded(arr){
+  loadingNode.children = arr[0].children;
+  for (var i = 0; i < loadingNode.children.length; i++) {
+    loadingNode.children[i] = d3.hierarchy(loadingNode.children[i]);
+  };
+  loadingNode.descendants().forEach(initLoadedNode);
+  console.log(loadingNode.descendants());
+  loadingNode.children.forEach(collapseAllChildren);
+  updateTree(currentRoot);
+}
+
+function initLoadedNode(node){
+  if(node == loadingNode) return;
+  node.depth += loadingNode.depth;
+  if (!node.parent) {
+    node.parent = loadingNode;
+  };
+  initializeNode(node);
+  updatePath();
 }
 
 //############################
@@ -473,6 +534,8 @@ function nodeClicked(node){
     collapseSingleNode(node);
     if(node.parent) currentRoot = node.parent;
   } else {
+    //check if new nodes have to be fetched from server
+    loadMoreNodes(node);
     //make the clicked node the new root and show its children
     currentRoot = node;
     if (node.childrenBackup) {
@@ -484,7 +547,6 @@ function nodeClicked(node){
     if(!nodeIsInPath) currentPath = root.path(node);
   }
   updateTree(currentRoot);
-  updatePath();
 }
 
 //calculates where to put each node using the layout d3 came up with as polar coordinates
@@ -639,7 +701,7 @@ function updateLeftSVGLinks(path){
                           }
               );
   //update positions of lines that aren't new to the svg
-  lines.transition().duration(animationDuration).attr("d", getLine);
+  lines.transition().duration(animationDuration).attr("d", getLine).attr("opacity",1);
 
   //insert lines for all new links in the path
   lines.enter()

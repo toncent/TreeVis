@@ -50,22 +50,18 @@ rect {
 
 .diagnosis {
   fill : var(--node-one-light);
-  stroke : var(--node-one-light);
 }
 
 .symptom {
   fill : var(--node-two-light);
-  stroke : var(--node-one-light);
 }
 
 .examination {
   fill : var(--node-three-light);
-  stroke : var(--node-one-light);
 }
 
 .therapy {
   fill : var(--node-four-light);
-  stroke : var(--node-one-light);
 }
 
 path {
