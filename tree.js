@@ -50,6 +50,7 @@ function fetchDataAndInitialize(){
   treeVisGraphId = getCookie("treeVisGraph");
   treeVisPatientId = getCookie("treeVisPatient");
   treeVisUser = getCookie("treeVisUser");
+  if(treeVisUser) treeVisUser = JSON.parse(treeVisUser);
   if (treeVisGraphId) {
     var url = "http://10.200.1.75:8012/tree?hops=10&name=" + treeVisGraphId;
     console.log("fetching tree from "+url)
@@ -120,6 +121,7 @@ function getPatientData(){
   var data = patientArr.medicalActions;
   medicalActions = [];
   for (var i = 0; i < data.length; i++) {
+    if(!data[i].action) continue;
     if (data[i].action.graphId == treeVisGraphId) {
       medicalActions.push(data[i]);
     }
@@ -884,7 +886,7 @@ function closePopUpMenu(){
     menuNodeSVG = undefined;
     menuNode = undefined;
     longPressHappened = false;
-  };
+  }
 }
 
 function addPopUpMenuListeners(){
@@ -915,11 +917,11 @@ function getPopUpMenuIconSize(){
   return (arcGenerator.outerRadius()() - arcGenerator.innerRadius()()) * 0.8;
 }
 
-function onPopUpMenuClick(element){
+function onPopUpMenuClick(){
   d3.event.stopPropagation();
   var circle = menuNodeSVG.select("circle");
   var menuButton = d3.select(this);
-  menuNode.data.state = menuButton.attr("class")
+  menuNode.data.state = menuButton.attr("class");
   menuButton.transition()
             .duration(animationDuration)
             .on("end", closePopUpMenu)
@@ -932,5 +934,30 @@ function onPopUpMenuClick(element){
   circle.classed("negative", false);
   circle.classed("unknown", false);
   circle.classed(menuButton.attr("class"), true);
+  updatePatientRecord(menuButton.attr("class"));
   updatePath();
+}
+
+function updatePatientRecord(className){
+    //public Patient save(@RequestParam(value = "patientId",required = true) Long patientId,
+    // @RequestParam(value = "userId",required = true) Long userId,
+    // @RequestParam(value = "graphName",defaultValue = "graphdiarrhea1") String graphName,
+    // @RequestParam(value = "action",required = true) String actionName,
+    // @RequestParam(value = "state",defaultValue = "POSITIVE") String state) {
+  console.log("patient record update for " + menuNode.data.name + ": " + className);
+  if(!treeVisUser) {
+    console.warn("Can't update patient record because user is not logged in. To log in go to /login.html");
+    return;
+  }
+  var url = "http://10.200.1.75:8016/patients/save?patientId=" + treeVisPatientId + "" +
+                                                  "&userId=" + treeVisUser.id +
+                                                  "&graphName=" + treeVisGraphId +
+                                                  "&action=" + menuNode.data.name +
+                                                  "&state=" + className.toUpperCase();
+  console.log("updating patient record using url " + url);
+  d3.json(url).get(null, onPatientRecordUpdated);
+}
+
+function onPatientRecordUpdated(arr){
+  console.log(arr);
 }
