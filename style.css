@@ -40,28 +40,30 @@ path {
 }
 
 circle {
-  stroke-width: 0;
-  transition: stroke-width 400ms, stroke 400ms;
+  stroke-width : 5;
+  fill :  white;
+  transition : stroke-width 400ms, stroke 400ms;
 }
 
 rect {
-  stroke: #000;
+  fill : white;
+  stroke-width : 5;
 }
 
 .diagnosis {
-  fill : var(--node-one-light);
+  stroke : var(--node-one-light);
 }
 
 .symptom {
-  fill : var(--node-two-light);
+  stroke : var(--node-two-light);
 }
 
 .examination {
-  fill : var(--node-three-light);
+  stroke : var(--node-three-light);
 }
 
 .therapy {
-  fill : var(--node-four-light);
+  stroke : var(--node-four-light);
 }
 
 path {
