@@ -11,6 +11,10 @@
   --node-two-light: #6183FF ;
   --node-three-light: #A05AE8 ;
   --node-four-light: #FD7CFF ;
+  --positive-green: rgba(60,225,60,1);
+  --positive-green-light: rgba(210,255,210,1);
+  --negative-red: rgba(230,100,100,1);
+  --negative-red-light: rgba(255,200,200,1);
 }
 
 text {
@@ -42,12 +46,13 @@ path {
 circle {
   stroke-width : 5;
   fill :  white;
-  transition : stroke-width 400ms, stroke 400ms;
+  transition : stroke-width 400ms, stroke 400ms, fill 400ms;
 }
 
 rect {
   fill : white;
   stroke-width : 5;
+  transition : stroke-width 400ms, stroke 400ms, fill 400ms;
 }
 
 .diagnosis {
@@ -71,12 +76,14 @@ path {
 }
 
 .positive{
-  stroke: rgba(60,225,60,1);
+  stroke: var(--positive-green);
+  fill: var(--positive-green-light);
   stroke-width : 5;
 }
 
 .negative{
-  stroke: rgba(230,100,100,1);
+  stroke: var(--negative-red);
+  fill: var(--negative-red-light);
   stroke-width : 5;
 }
 

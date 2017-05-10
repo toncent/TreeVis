@@ -52,12 +52,12 @@ function fetchDataAndInitialize(){
   treeVisUser = getCookie("treeVisUser");
   if(treeVisUser) treeVisUser = JSON.parse(treeVisUser);
   if (treeVisGraphId) {
-    var url = "http://10.200.1.75:8012/tree?hops=10&name=" + treeVisGraphId;
-    console.log("fetching tree from "+url)
+    var url = "http://10.200.1.74:8020/tree?hops=10&name=" + treeVisGraphId;
+    console.log("fetching tree from "+url);
     d3.json(url).get(null, onTreeDataReturned);
   } else {
     treeVisGraphId = "graphdiarrhea1";
-    d3.json("http://10.200.1.75:8012/tree?hops=10&name=graphdiarrhea1").get(null, onTreeDataReturned);
+    d3.json("http://10.200.1.74:8020/tree?hops=10&name=graphdiarrhea1").get(null, onTreeDataReturned);
     //window.location.href = "login.html";
   }
   //d3.json("exampleTree.json").get(null, onTreeDataReturned);
@@ -71,7 +71,7 @@ function onTreeDataReturned(arr){
     treeArr = arr;
   }
   if (treeVisPatientId) {
-    d3.json("http://10.200.1.75:8016/patients/id/" + treeVisPatientId).get(null, onPatientDataReturned);
+    d3.json("http://10.200.1.74:8020/patients/id/" + treeVisPatientId).get(null, onPatientDataReturned);
   } else {
     onAllDataReturned();
   }
@@ -80,7 +80,7 @@ function onTreeDataReturned(arr){
 function onPatientDataReturned(arr){
   if(!arr) {
     //TODO real error handling
-    console.log("error fetching patient data. returned data was " + arr);
+    console.warn("error fetching patient data for http://10.200.1.74:8020/patients/id/" + treeVisPatientId + " . returned data was " + arr);
   } else {
     patientArr = arr;
   }
@@ -345,11 +345,13 @@ function jumpToNode(node){
 function loadMoreNodes(node){
   var url;
   var children = node.children || node.childrenBackup;
+  var result = false;
   if (!children && node.data.properties["out-degree"] > 0) {
     //new nodes have to be fetched from server
-    url = "http://10.200.1.75:8012/tree?hops=5&name=" + treeVisGraphId+"&rootNodeId=" + node.data.properties.id;
+    url = "http://10.200.1.74:8020/tree?hops=5&name=" + treeVisGraphId+"&rootNodeId=" + node.data.properties.id;
     node.children = [];
     loadingNode = node;
+    result = true;
   }
 
   if (url) {
@@ -358,6 +360,7 @@ function loadMoreNodes(node){
     console.log("fetching tree from "+url)
     d3.json(url).get(null, onMoreNodesLoaded);
   };
+  return result;
 }
 
 function addDummyNodes(node){
@@ -524,6 +527,7 @@ function createNewRightSvgLinks(newLinks){
 }
 
 function nodeClicked(node){
+  var nodesLoading = false;
   if (longPressHappened) {
     longPressHappened = false;
     d3.event.stopPropagation();
@@ -537,7 +541,7 @@ function nodeClicked(node){
     if(node.parent) currentRoot = node.parent;
   } else {
     //check if new nodes have to be fetched from server
-    loadMoreNodes(node);
+    nodesLoading = loadMoreNodes(node);
     //make the clicked node the new root and show its children
     currentRoot = node;
     if (node.childrenBackup) {
@@ -549,6 +553,7 @@ function nodeClicked(node){
     if(!nodeIsInPath) currentPath = root.path(node);
   }
   updateTree(currentRoot);
+  if(!nodesLoading) updatePath();
 }
 
 //calculates where to put each node using the layout d3 came up with as polar coordinates
@@ -949,13 +954,13 @@ function updatePatientRecord(className){
     console.warn("Can't update patient record because user is not logged in. To log in go to /login.html");
     return;
   }
-  var url = "http://10.200.1.75:8016/patients/save?patientId=" + treeVisPatientId + "" +
+  var url = "http://10.200.1.74:8020/patients/save?patientId=" + treeVisPatientId + "" +
                                                   "&userId=" + treeVisUser.id +
                                                   "&graphName=" + treeVisGraphId +
-                                                  "&action=" + menuNode.data.name +
+                                                  "&action=" + menuNode.data.properties.id +
                                                   "&state=" + className.toUpperCase();
   console.log("updating patient record using url " + url);
-  d3.json(url).get(null, onPatientRecordUpdated);
+  //d3.json(url).get(null, onPatientRecordUpdated);
 }
 
 function onPatientRecordUpdated(arr){

@@ -17,8 +17,8 @@ function init(){
 
 function loadData(){
   //request all patients
-  d3.json("http://10.200.1.75:8016/patients/all").get(null, fillPatientList);
-  d3.json("http://10.200.1.75:8016/graphs/all-trees").get(null, fillGraphList);
+  d3.json("http://10.200.1.74:8020/patients/all").get(null, fillPatientList);
+  d3.json("http://10.200.1.74:8020/graphs/all-trees").get(null, fillGraphList);
 }
 
 function fillPatientList(arr){
