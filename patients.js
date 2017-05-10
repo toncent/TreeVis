@@ -23,6 +23,7 @@ function loadData(){
 
 function fillPatientList(arr){
   patients = arr;
+  console.log("received patients " + arr + "from http://10.200.1.74:8020/patients/all");
   document.getElementById("loader-container").style.display = "none";
   patientListItems = d3.select("ul#patient-list").selectAll("li").data(patients);
   patientListItems = patientListItems.enter().append("li").classed("w3-padding-16 w3-hover-blue", true).style("cursor", "pointer");
@@ -45,7 +46,7 @@ function getItemName(item){
 }
 
 function getPatientDateOfBirth(patient){
-  return new Date(patient.dateOfBirth / 10000000).toDateString();
+  return new Date(patient.dateOfBirth).toDateString();
 }
 
 function patientListItemClicked(patient){

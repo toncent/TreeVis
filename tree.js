@@ -34,6 +34,8 @@ var treeVisPatientId, treeVisGraphId, treeVisUser, treeArr, patientArr, medicalA
 
 var loadingNode;
 
+var serverUrl = "http://10.200.1.74:8020/";
+
 //############################
 // Initialization
 //############################
@@ -52,12 +54,12 @@ function fetchDataAndInitialize(){
   treeVisUser = getCookie("treeVisUser");
   if(treeVisUser) treeVisUser = JSON.parse(treeVisUser);
   if (treeVisGraphId) {
-    var url = "http://10.200.1.74:8020/tree?hops=10&name=" + treeVisGraphId;
+    var url = serverUrl + "tree?hops=10&name=" + treeVisGraphId;
     console.log("fetching tree from "+url);
     d3.json(url).get(null, onTreeDataReturned);
   } else {
     treeVisGraphId = "graphdiarrhea1";
-    d3.json("http://10.200.1.74:8020/tree?hops=10&name=graphdiarrhea1").get(null, onTreeDataReturned);
+    d3.json(serverUrl + "tree?hops=10&name=graphdiarrhea1").get(null, onTreeDataReturned);
     //window.location.href = "login.html";
   }
   //d3.json("exampleTree.json").get(null, onTreeDataReturned);
@@ -71,7 +73,7 @@ function onTreeDataReturned(arr){
     treeArr = arr;
   }
   if (treeVisPatientId) {
-    d3.json("http://10.200.1.74:8020/patients/id/" + treeVisPatientId).get(null, onPatientDataReturned);
+    d3.json(serverUrl + "patients/id/" + treeVisPatientId).get(null, onPatientDataReturned);
   } else {
     onAllDataReturned();
   }
@@ -131,13 +133,12 @@ function getPatientData(){
 function initializeNode(node){
   node.left = {};
   if (medicalActions) {
-    for (var i = 0; i < medicalActions.length; i++) {
-      if(medicalActions[i].action.name == node.data.name){
-        node.data.state = medicalActions[i].state.toLowerCase();
-        break;
-      }
-    };
-  };
+    var relevantActions = medicalActions.filter(d => d.action.name === node.data.name);
+    if(relevantActions.length > 0){
+        var latestAction = relevantActions.sort((a,b) => {return a.timestamp-b.timestamp}).pop();
+        node.data.state = latestAction.state.toLowerCase();
+    }
+  }
 }
 
 function initHtmlElements(){
@@ -348,7 +349,7 @@ function loadMoreNodes(node){
   var result = false;
   if (!children && node.data.properties["out-degree"] > 0) {
     //new nodes have to be fetched from server
-    url = "http://10.200.1.74:8020/tree?hops=5&name=" + treeVisGraphId+"&rootNodeId=" + node.data.properties.id;
+    url = serverUrl + "tree?hops=5&name=" + treeVisGraphId+"&rootNodeId=" + node.data.properties.id;
     node.children = [];
     loadingNode = node;
     result = true;
@@ -954,13 +955,13 @@ function updatePatientRecord(className){
     console.warn("Can't update patient record because user is not logged in. To log in go to /login.html");
     return;
   }
-  var url = "http://10.200.1.74:8020/patients/save?patientId=" + treeVisPatientId + "" +
+  var url = serverUrl + "patients/save?patientId=" + treeVisPatientId + "" +
                                                   "&userId=" + treeVisUser.id +
                                                   "&graphName=" + treeVisGraphId +
                                                   "&action=" + menuNode.data.properties.id +
                                                   "&state=" + className.toUpperCase();
   console.log("updating patient record using url " + url);
-  //d3.json(url).get(null, onPatientRecordUpdated);
+  d3.json(url).get(null, onPatientRecordUpdated);
 }
 
 function onPatientRecordUpdated(arr){
