@@ -9,7 +9,8 @@ function init(){
   if(getCookie("treeVisUser")){
     userCookie = JSON.parse(getCookie("treeVisUser"));
   } else {
-    //window.location.href = "login.html";
+    window.location.href = "login.html";
+    return;
   }
   //load patients and graphs from server
   loadData();

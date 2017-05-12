@@ -53,14 +53,16 @@ function fetchDataAndInitialize(){
   treeVisPatientId = getCookie("treeVisPatient");
   treeVisUser = getCookie("treeVisUser");
   if(treeVisUser) treeVisUser = JSON.parse(treeVisUser);
+  else window.location.href = "login.html";
+
   if (treeVisGraphId) {
     var url = serverUrl + "tree?hops=10&name=" + treeVisGraphId;
     console.log("fetching tree from "+url);
     d3.json(url).get(null, onTreeDataReturned);
   } else {
-    treeVisGraphId = "graphdiarrhea1";
-    d3.json(serverUrl + "tree?hops=10&name=graphdiarrhea1").get(null, onTreeDataReturned);
-    //window.location.href = "login.html";
+    //treeVisGraphId = "graphdiarrhea1";
+    //d3.json(serverUrl + "tree?hops=10&name=graphdiarrhea1").get(null, onTreeDataReturned);
+    window.location.href = "patients.html";
   }
   //d3.json("exampleTree.json").get(null, onTreeDataReturned);
 }
@@ -955,12 +957,13 @@ function updatePatientRecord(className){
     console.warn("Can't update patient record because user is not logged in. To log in go to /login.html");
     return;
   }
+  if(!treeVisPatientId) return;
   var url = serverUrl + "patients/save?patientId=" + treeVisPatientId + "" +
                                                   "&userId=" + treeVisUser.id +
                                                   "&graphName=" + treeVisGraphId +
                                                   "&action=" + menuNode.data.properties.id +
                                                   "&state=" + className.toUpperCase();
-  console.log("updating patient record using url " + url);
+  //console.log("updating patient record using url " + url);
   d3.json(url).get(null, onPatientRecordUpdated);
 }
 
