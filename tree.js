@@ -34,7 +34,7 @@ var treeVisPatientId, treeVisGraphId, treeVisUser, treeArr, patientArr, medicalA
 
 var loadingNode;
 
-var serverUrl = "http://10.200.1.74:8020/";
+var serverUrl = "http://52.59.228.237:8020/";
 
 //############################
 // Initialization
@@ -84,7 +84,7 @@ function onTreeDataReturned(arr){
 function onPatientDataReturned(arr){
   if(!arr) {
     //TODO real error handling
-    console.warn("error fetching patient data for http://10.200.1.74:8020/patients/id/" + treeVisPatientId + " . returned data was " + arr);
+    console.warn("error fetching patient data for "+ serverUrl+"/patients/id/" + treeVisPatientId + " . returned data was " + arr);
   } else {
     patientArr = arr;
   }

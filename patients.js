@@ -18,13 +18,13 @@ function init(){
 
 function loadData(){
   //request all patients
-  d3.json("http://10.200.1.74:8020/patients/all").get(null, fillPatientList);
-  d3.json("http://10.200.1.74:8020/graphs/all-trees").get(null, fillGraphList);
+  d3.json("http://52.59.228.237:8020/patients/all").get(null, fillPatientList);
+  d3.json("http://52.59.228.237:8020/graphs/all-trees").get(null, fillGraphList);
 }
 
 function fillPatientList(arr){
   patients = arr;
-  console.log("received patients " + arr + "from http://10.200.1.74:8020/patients/all");
+  console.log("received patients " + arr + "from http://52.59.228.237:8020/patients/all");
   document.getElementById("loader-container").style.display = "none";
   patientListItems = d3.select("ul#patient-list").selectAll("li").data(patients);
   patientListItems = patientListItems.enter().append("li").classed("w3-padding-16 w3-hover-blue", true).style("cursor", "pointer");

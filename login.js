@@ -3,7 +3,7 @@ var error, response, request;
 function login(){
     var username = document.getElementById("username").value;
     var password = document.getElementById("password").value;
-    var url = "http://10.200.1.74:8020/users/login?username="+username+"&password="+password
+    var url = "http://52.59.228.237:8020/users/login?username="+username+"&password="+password
     request = d3.html(url).get(handleError, handleResponse);
     showLoaderAnimation();
 }
