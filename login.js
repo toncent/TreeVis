@@ -1,6 +1,7 @@
 var error, response, request;
 
 function login(){
+    console.log("asdasdasd")
     var username = document.getElementById("username").value;
     var password = document.getElementById("password").value;
     var url = "http://52.59.228.237:8020/users/login?username="+username+"&password="+password
