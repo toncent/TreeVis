@@ -131,6 +131,7 @@ function getPatientData(){
       medicalActions.push(data[i]);
     }
   }
+  console.log("medical actions: " + medicalActions.length);
 }
 
 function initializeNode(node){
