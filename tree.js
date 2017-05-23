@@ -48,7 +48,7 @@ fetchDataAndInitialize();
 // Functions
 //############################
 function fetchDataAndInitialize(){
-  console.log("new stuff 1");
+  console.log("new stuff 2");
   //load example tree data from json file
   treeVisGraphId = getCookie("treeVisGraph");
   treeVisPatientId = getCookie("treeVisPatient");
@@ -553,7 +553,7 @@ function nodeClicked(node){
     }
     //set the clicked node as the new endpoint on the 
     //left side so greyed out nodes disappear
-    var nodeIsInPath = currentPath.find(function(n){return n == node});
+    var nodeIsInPath = currentPath[currentPath.indexOf(node)]//currentPath.find(function(n){return n == node});
     if(!nodeIsInPath) currentPath = root.path(node);
   }
   updateTree(currentRoot);
