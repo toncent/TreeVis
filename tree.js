@@ -135,9 +135,9 @@ function getPatientData(){
 function initializeNode(node){
   node.left = {};
   if (medicalActions) {
-    var relevantActions = medicalActions.filter(d => d.action.name === node.data.name);
+    var relevantActions = medicalActions.filter(function(d){d.action.name === node.data.name});
     if(relevantActions.length > 0){
-        var latestAction = relevantActions.sort((a,b) => {return a.timestamp-b.timestamp}).pop();
+        var latestAction = relevantActions.sort(function(a,b){return a.timestamp-b.timestamp}).pop();
         node.data.state = latestAction.state.toLowerCase();
     }
   }
