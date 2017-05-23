@@ -138,9 +138,11 @@ function initializeNode(node){
   node.left = {};
   if (medicalActions) {
     var relevantActions = medicalActions.filter(function(d){d.action.name === node.data.name});
+    console.log("relevant actions: " + relevantActions.length);
     if(relevantActions.length > 0){
         var latestAction = relevantActions.sort(function(a,b){return a.timestamp-b.timestamp}).pop();
         node.data.state = latestAction.state.toLowerCase();
+        console.log("setting" + node.data.name + " to " + node.data.state);
     }
   }
 }
