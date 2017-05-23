@@ -48,6 +48,7 @@ fetchDataAndInitialize();
 // Functions
 //############################
 function fetchDataAndInitialize(){
+  console.log("new stuff");
   //load example tree data from json file
   treeVisGraphId = getCookie("treeVisGraph");
   treeVisPatientId = getCookie("treeVisPatient");
