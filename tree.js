@@ -48,7 +48,7 @@ fetchDataAndInitialize();
 // Functions
 //############################
 function fetchDataAndInitialize(){
-  console.log("new stuff 2");
+  console.log("new stuff 3");
   //load example tree data from json file
   treeVisGraphId = getCookie("treeVisGraph");
   treeVisPatientId = getCookie("treeVisPatient");
@@ -137,7 +137,7 @@ function getPatientData(){
 function initializeNode(node){
   node.left = {};
   if (medicalActions) {
-    var relevantActions = medicalActions.filter(function(d){d.action.name === node.data.name});
+    var relevantActions = medicalActions.filter(function(d){ return d.action.name === node.data.name});
     console.log("relevant actions: " + relevantActions.length);
     if(relevantActions.length > 0){
         var latestAction = relevantActions.sort(function(a,b){return a.timestamp-b.timestamp}).pop();
