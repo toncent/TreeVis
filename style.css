@@ -1,4 +1,4 @@
-:root{
+/*:root{
   --highlight-color: #6FFF0D ;
   --highlight-color-light: #6FFF0D ;
   --content-color: #383838 ;
@@ -15,7 +15,7 @@
   --positive-green-light: rgba(210,255,210,1);
   --negative-red: rgba(230,100,100,1);
   --negative-red-light: rgba(255,200,200,1);
-}
+}*/
 
 text {
   pointer-events: none;
@@ -56,19 +56,19 @@ rect {
 }
 
 .diagnosis {
-  stroke : var(--node-one-light);
+  stroke : #9EFFE9;
 }
 
 .symptom {
-  stroke : var(--node-two-light);
+  stroke : #9EFFE9;
 }
 
 .examination {
-  stroke : var(--node-three-light);
+  stroke : #9EFFE9;
 }
 
 .therapy {
-  stroke : var(--node-four-light);
+  stroke : #9EFFE9;
 }
 
 path {
@@ -76,14 +76,14 @@ path {
 }
 
 .positive{
-  stroke: var(--positive-green);
-  fill: var(--positive-green-light);
+  stroke: rgba(60,225,60,1);
+  fill: rgba(210,255,210,1);
   stroke-width : 5;
 }
 
 .negative{
-  stroke: var(--negative-red);
-  fill: var(--negative-red-light);
+  stroke: rgba(230,100,100,1);
+  fill: rgba(255,200,200,1);
   stroke-width : 5;
 }
 
